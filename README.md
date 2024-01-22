@@ -1,5 +1,5 @@
 # NVCF Helper Functions
-Functions that simplify common tasks with NVIDIA Cloud Functions
+Functions that simplify common tasks within NVIDIA Cloud Functions
 
 - `nvcf_container` helpers are used inside containers to be deployed as functions.
 
