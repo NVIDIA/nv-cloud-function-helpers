@@ -2,7 +2,7 @@ import os
 import io
 import re
 import base64
-import uuid
+import json
 import sys
 import logging
 import codecs
@@ -16,6 +16,15 @@ IMAGE_QUALITY = 90
 b64_pattern = re.compile(
     "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$"
 )
+
+
+def _uppercase_dict_keys(d: dict) -> dict:
+    """
+    Converts all keys in a dictionary to upper case
+    :param d: the target dictionary
+    :return:
+    """
+    return {k.upper(): v for k, v in d.items()}
 
 
 def get_logger() -> logging.Logger:
@@ -78,6 +87,7 @@ def get_output_path(request_parameters: dict) -> str:
     :param request_parameters: a dict of the parameters passed to the function
     :return: asset output path string
     """
+    request_parameters = _uppercase_dict_keys(request_parameters)
     request_id = get_request_id(request_parameters)
     output_path = request_parameters.get(
         "NVCF-LARGE-OUTPUT-DIR", f"/var/inf/response/{request_id}"
@@ -92,6 +102,7 @@ def get_input_path(request_parameters: dict) -> str:
     :param request_parameters: a dict of the parameters passed to the function
     :return: asset input path string
     """
+    request_parameters = _uppercase_dict_keys(request_parameters)
     request_id = get_request_id(request_parameters)
     input_assets_path_base = request_parameters.get(
         "NVCF-ASSET-DIR", f"/var/inf/inputAssets/{request_id}"
@@ -107,6 +118,7 @@ def get_max_msg_size(request_parameters: dict) -> int:
     :param request_parameters: a dict of the parameters passed to the function
     :return: max returned bytes size in int
     """
+    request_parameters = _uppercase_dict_keys(request_parameters)
     max_response_size = request_parameters.get("NVCF-MAX-RESPONSE-SIZE-BYTES")
     if max_response_size is None:
         l = get_logger()
@@ -125,6 +137,7 @@ def get_nca_id(request_parameters: dict) -> str:
     :param request_parameters: a dict of the parameters passed to the function
     :return: ncaId string
     """
+    request_parameters = _uppercase_dict_keys(request_parameters)
     return request_parameters.get("NVCF-NCAID", "")
 
 
@@ -134,6 +147,7 @@ def get_request_id(request_parameters: dict) -> str:
     :param request_parameters: a dict of the parameters passed to the function
     :return: request id string
     """
+    request_parameters = _uppercase_dict_keys(request_parameters)
     return request_parameters.get("NVCF-REQID", "")
 
 
@@ -143,7 +157,7 @@ def get_asset_ids(request_parameters: dict) -> list:
     :param request_parameters: a dict of the parameters passed to the function
     :return: list of asset ids
     """
-
+    request_parameters = _uppercase_dict_keys(request_parameters)
     s = request_parameters.get("NVCF-FUNCTION-ASSET-IDS", "")
     ids = s.split(",")
     return ids
@@ -155,6 +169,7 @@ def get_properties_sub(request_parameters: dict) -> str:
     :param request_parameters: a dict of the parameters passed to the function
     :return: sub properties string
     """
+    request_parameters = _uppercase_dict_keys(request_parameters)
     return request_parameters.get("NVCF-SUB", "")
 
 
@@ -164,6 +179,7 @@ def get_function_id(request_parameters: dict) -> str:
     :param request_parameters: a dict of the parameters passed to a function
     :return: function ID str
     """
+    request_parameters = _uppercase_dict_keys(request_parameters)
     return request_parameters.get("NVCF-FUNCTION-ID", "")
 
 
@@ -173,6 +189,7 @@ def get_function_name(request_parameters: dict) -> str:
     :param request_parameters: a dict of the parameters passed to a function
     :return: function name string
     """
+    request_parameters = _uppercase_dict_keys(request_parameters)
     return request_parameters.get("NVCF-FUNCTION-ID", "")
 
 
