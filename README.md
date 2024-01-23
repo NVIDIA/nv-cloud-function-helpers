@@ -1,10 +1,8 @@
-# NVCF Helper Functions
-Functions that simplify common tasks within NVIDIA Cloud Functions
+# NVCF Container Helper Functions
+The package `nvcf_container` provide Python functions that simplify common tasks within containers deployed inside  
+[NVIDIA Cloud Functions](https://docs.nvidia.com/cloud-functions/user-guide/latest/cloud-function/overview.html)
 
-- `nvcf_container` helpers are used inside containers to be deployed as functions.
-
-
-## Installation
+## Package Installation
 
 ```bash
 pip3 install setuptools
