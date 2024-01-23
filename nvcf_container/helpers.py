@@ -42,6 +42,29 @@ def get_logger() -> logging.Logger:
     return logger
 
 
+def update_progress_file(
+    request_parameters: dict, progress_value: int, partial_response: dict = {}
+):
+    """
+    A function that creates a file in the format NVCF expects to report process of a long-running function
+    :param request_parameters: a dict of the parameters passed to the function
+    :param progress_value: an integer value from 0 to 100 that describes the progress currently is
+    :param partial_response: an optional dict of information to pass
+    :return:
+    """
+    p = get_output_path(request_parameters)
+    structure = {
+        "id": get_request_id(request_parameters),
+        "progress": progress_value,
+    }
+
+    structure.update({"partialResponse": partial_response})
+
+    with open(os.path.join(p, "progress"), "w") as outfile:
+        # Write the dictionary to the file in JSON format
+        json.dump(structure, outfile)
+
+
 def get_scalar_inputs(request, pairs: list) -> list:
     """
     A function built for use within the Triton Inference Server Python-backend
