@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="nv-cloud-function-helpers",
+    name="nv_cloud_function_helpers",
     version="0.0.1",
     description="A library with functions for NVCF",
     url="https://github.com/NVIDIA/nv-cloud-function-helpers",
