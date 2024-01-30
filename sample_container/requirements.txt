@@ -1,0 +1,6 @@
+--extra-index-url https://pypi.ngc.nvidia.com
+nvidia-pytriton==0.5.0
+numpy
+requests
+pillow
+git+git@github.com:NVIDIA/nv-cloud-function-helpers.git
