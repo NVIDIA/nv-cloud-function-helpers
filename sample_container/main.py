@@ -3,30 +3,11 @@ import numpy as np
 from pytriton.model_config import ModelConfig, Tensor
 from pytriton.triton import Triton, TritonConfig
 from nv_cloud_function_helpers.nvcf_container import helpers
+from PIL import Image
 
 
 class PyTritonServer:
     """triton server for sample_container"""
-
-    @staticmethod
-    def numpy_array_to_variable(numpy_array):
-        """Convert received values into actual values."""
-        if not isinstance(numpy_array, np.ndarray):
-            return numpy_array
-
-        if numpy_array.size == 2 and numpy_array.shape == (1, 2):
-            # If the array contains two elements and has shape (1, 2), return them as a tuple
-            value = tuple(numpy_array[0])
-        elif numpy_array.size != 1:
-            raise ValueError("Input array must have a single element")
-        else:
-            value = numpy_array.item()
-
-            if numpy_array.dtype.kind in ("S", "O"):
-                # If it's a binary string, decode it to a regular string
-                value = value.decode("utf-8")
-
-        return value
 
     def __init__(self):
         self.logger = helpers.get_logger()
@@ -36,34 +17,58 @@ class PyTritonServer:
         responses = []
         for req in requests:
             # deal with header dict keys being lowerscale
-            request_parameters_dict = PyTritonServer.uppercase_keys(
+            self.logger.info("getting request headers")
+            request_parameters_dict = helpers._uppercase_dict_keys(
                 req.parameters
             )
+            self.logger.info("printing headers")
+            for k in request_parameters_dict.keys():
+                print(f"{k} : {request_parameters_dict.get(k, None)}")
             input_path = helpers.get_input_path(request_parameters_dict)
             output_path = helpers.get_output_path(request_parameters_dict)
 
-            self.logger.info("getting values from inference request")
+            self.logger.info(
+                "getting request body values from inference request"
+            )
             req_data = req.data
+            self.logger.info("printing request body")
+            for k in req_data.keys():
+                print(f"{k} : {req_data.get(k, None)}")
+
             # get the asset id for the image
+            # you can read it from the body if passed in as a part of the request
+            # or read it from the header NVCF-FUNCTION-ASSET-IDS
             asset_ids = helpers.get_asset_ids(request_parameters_dict)
-            prompts = req_data.get("image", None)
+            image_asset_id = req_data.get("image", None)[0].decode("utf-8")
+
             self.logger.info("got values from inference request")
-            # read the image from disk using image nad input_path
-            image = helpers.load_image(image, input_path, has_transparency=False)
+            # read the image from disk using image and input_path
+            image = helpers.load_image(
+                image_asset_id, input_path, has_transparency=False
+            )
             self.logger.info("starting inference")
             # rotate the image 180 degrees, saving partial progress
-            #encode_image_to_base64
-            #save_image_with_directory
-            # create output folder
-            if output_path is not None:
-                os.makedirs(output_path, exist_ok=True)
-
+            for i in range(1, 181):
+                # rotate the image 1 degree
+                temp_image = image.rotate(i)
+                progress_scaled_to_100 = (i / 180) * 100
+                # update partial response
+                helpers.update_progress_file(
+                    request_parameters=request_parameters_dict,
+                    progress_value=progress_scaled_to_100,
+                    partial_response={},
+                )
+            image = temp_image
             self.logger.info("inference done")
-            # resize image if it needs to be resized
 
+            # we can return the image through base64 encoded string
+            # or drop it to disk to return as a presigned download URL
+            # encode_image_to_base64
+            self.logger.info("encoding image to base64")
             image_encoded = helpers.encode_image_to_base64(
-                image, image_format="PNG"
+                image=image, image_format="PNG"
             )
+
             # check image size and if greater, save; else return bytestring
             if len(image_encoded) < helpers.get_max_msg_size(
                 request_parameters_dict
@@ -78,8 +83,14 @@ class PyTritonServer:
                     }
                 )
             else:
+                # save image to disk as image.png and return an empty numpy array
                 self.logger.info("saving prediction numpy array to disk")
-                image.save(os.path.join(output_path, "image.png"))
+                # create output folder
+                if output_path is not None:
+                    os.makedirs(output_path, exist_ok=True)
+                save_path = helpers.save_image_with_directory(
+                    image=image, path=output_path, image_format="PNG"
+                )
                 self.logger.info("returning empty response")
                 responses.append(
                     {"image_generated": np.empty(shape=[1], dtype=np.bytes_)}
@@ -90,7 +101,7 @@ class PyTritonServer:
         """run triton server"""
         with Triton(
             config=TritonConfig(
-                http_header_forward_pattern="NVCF-*",
+                http_header_forward_pattern="nvcf-*",
                 http_port=8000,
                 grpc_port=8001,
                 metrics_port=8002,
