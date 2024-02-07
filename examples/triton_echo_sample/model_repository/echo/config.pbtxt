@@ -1,0 +1,29 @@
+name: "echo"
+backend: "python"
+max_batch_size: 0
+input [
+    {
+        name: "message"
+        data_type: TYPE_STRING
+        dims: [1]
+    },
+    {
+        name: "response_delay_in_seconds"
+        data_type: TYPE_FP32
+        dims: [1]
+        optional: true
+    }
+]
+output [
+    {
+        name: "echo"
+        data_type: TYPE_STRING
+        dims: [1]
+    }
+]
+instance_group [
+    {
+      count: 1
+      kind: KIND_CPU
+    }
+]
