@@ -1,1 +1,1 @@
-nvidia-pytriton==0.4.2
+nvidia-pytriton==0.5.1
