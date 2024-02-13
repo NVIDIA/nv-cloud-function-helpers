@@ -32,7 +32,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "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",
+									"value": "{{latestBearerToken}}",
 									"type": "string"
 								}
 							]
@@ -50,20 +50,16 @@
 							"raw": "{\n  \"messages\": [\n    {\n      \"content\": \"I am going to Paris, what should I see?\",\n      \"role\": \"user\"\n    }\n  ],\n  \"temperature\": 0.2,\n  \"top_p\": 0.7,\n  \"max_tokens\": 1024,\n  \"seed\": 42,\n  \"stream\": false\n}"
 						},
 						"url": {
-							"raw": "https://api.nvcf.nvidia.com/v2/nvcf/pexec/functions/8f4118ba-60a8-4e6b-8574-e38a4067a4a3",
-							"protocol": "https",
+							"raw": "{{baseUrl}}/v2/nvcf/pexec/functions/{{aiPlaygroundsLLMFunctionID}}",
 							"host": [
-								"api",
-								"nvcf",
-								"nvidia",
-								"com"
+								"{{baseUrl}}"
 							],
 							"path": [
 								"v2",
 								"nvcf",
 								"pexec",
 								"functions",
-								"8f4118ba-60a8-4e6b-8574-e38a4067a4a3"
+								"{{aiPlaygroundsLLMFunctionID}}"
 							]
 						}
 					},
@@ -92,7 +88,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "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",
+									"value": "{{latestBearerToken}}",
 									"type": "string"
 								}
 							]
@@ -110,20 +106,16 @@
 							"raw": "{\n  \"messages\": [\n    {\n      \"content\": \"I am going to Paris, what should I see?\",\n      \"role\": \"user\"\n    }\n  ],\n  \"temperature\": 0.2,\n  \"top_p\": 0.7,\n  \"max_tokens\": 1024,\n  \"seed\": 42,\n  \"stream\": false\n}"
 						},
 						"url": {
-							"raw": "https://api.nvcf.nvidia.com/v2/nvcf/pexec/functions/8f4118ba-60a8-4e6b-8574-e38a4067a4a3",
-							"protocol": "https",
+							"raw": "{{baseUrl}}/v2/nvcf/pexec/functions/{{aiPlaygroundsLLMFunctionID}}",
 							"host": [
-								"api",
-								"nvcf",
-								"nvidia",
-								"com"
+								"{{baseUrl}}"
 							],
 							"path": [
 								"v2",
 								"nvcf",
 								"pexec",
 								"functions",
-								"8f4118ba-60a8-4e6b-8574-e38a4067a4a3"
+								"{{aiPlaygroundsLLMFunctionID}}"
 							]
 						}
 					},
@@ -152,7 +144,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "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",
+									"value": "{{latestBearerToken}}",
 									"type": "string"
 								}
 							]
@@ -170,20 +162,16 @@
 							"raw": "{\n    \"inputs\": [\n        {\n            \"name\": \"message\",\n            \"shape\": [\n                1\n            ],\n            \"datatype\": \"BYTES\",\n            \"data\": [\n                \"YEET\"\n            ]\n        },\n        {\n            \"name\": \"response_delay_in_seconds\",\n            \"shape\": [\n                1\n            ],\n            \"datatype\": \"FP32\",\n            \"data\": [\n                0.1\n            ]\n        }\n    ],\n    \"outputs\": [\n        {\n            \"name\": \"echo\",\n            \"datatype\": \"BYTES\",\n            \"shape\": [\n                1\n            ]\n        }\n    ]\n}"
 						},
 						"url": {
-							"raw": "https://api.nvcf.nvidia.com/v2/nvcf/pexec/functions/8451bc5f-982e-4f25-a5ec-6ed280c10ac7",
-							"protocol": "https",
+							"raw": "{{baseUrl}}/v2/nvcf/pexec/functions/{{functionId}}",
 							"host": [
-								"api",
-								"nvcf",
-								"nvidia",
-								"com"
+								"{{baseUrl}}"
 							],
 							"path": [
 								"v2",
 								"nvcf",
 								"pexec",
 								"functions",
-								"8451bc5f-982e-4f25-a5ec-6ed280c10ac7"
+								"{{functionId}}"
 							]
 						}
 					},
@@ -215,7 +203,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "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",
+									"value": "{{latestBearerToken}}",
 									"type": "string"
 								}
 							]
@@ -233,20 +221,16 @@
 							"raw": "{\n  \"prompt\": \"A photo of a Shiba Inu dog with a backpack riding a bike\",\n  \"negative_prompt\": \"beach\",\n  \"sampler\": \"DPM\",\n  \"seed\": 0,\n  \"guidance_scale\": 5,\n  \"inference_steps\": 25\n}"
 						},
 						"url": {
-							"raw": "https://api.nvcf.nvidia.com/v2/nvcf/pexec/functions/89848fb8-549f-41bb-88cb-95d6597044a4",
-							"protocol": "https",
+							"raw": "{{baseUrl}}/v2/nvcf/pexec/functions/{{aiPlaygroundsImageFunctionID}}",
 							"host": [
-								"api",
-								"nvcf",
-								"nvidia",
-								"com"
+								"{{baseUrl}}"
 							],
 							"path": [
 								"v2",
 								"nvcf",
 								"pexec",
 								"functions",
-								"89848fb8-549f-41bb-88cb-95d6597044a4"
+								"{{aiPlaygroundsImageFunctionID}}"
 							]
 						}
 					},
@@ -402,7 +386,7 @@
 		},
 		{
 			"key": "functionId",
-			"value": "8451bc5f-982e-4f25-a5ec-6ed280c10ac7",
+			"value": "",
 			"type": "default"
 		},
 		{
