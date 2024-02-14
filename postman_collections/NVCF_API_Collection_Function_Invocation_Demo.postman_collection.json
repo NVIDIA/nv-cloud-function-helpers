@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "380bc25d-7834-41ed-854e-e5a1d0bf0771",
+		"_postman_id": "7ae06323-fd3f-4b06-b631-94efa731b6ac",
 		"name": "NVCF API Collection - Function Invocation Demo",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "32309907"
+		"_exporter_id": "26878239"
 	},
 	"item": [
 		{
@@ -99,11 +99,16 @@
 								"key": "Content-Type",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": " text/event-stream",
+								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"messages\": [\n    {\n      \"content\": \"I am going to Paris, what should I see?\",\n      \"role\": \"user\"\n    }\n  ],\n  \"temperature\": 0.2,\n  \"top_p\": 0.7,\n  \"max_tokens\": 1024,\n  \"seed\": 42,\n  \"stream\": false\n}"
+							"raw": "{\n  \"messages\": [\n    {\n      \"content\": \"I am going to Paris, what should I see?\",\n      \"role\": \"user\"\n    }\n  ],\n  \"temperature\": 0.2,\n  \"top_p\": 0.7,\n  \"max_tokens\": 1024,\n  \"seed\": 42,\n  \"stream\": true\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/v2/nvcf/pexec/functions/{{aiPlaygroundsLLMFunctionID}}",
