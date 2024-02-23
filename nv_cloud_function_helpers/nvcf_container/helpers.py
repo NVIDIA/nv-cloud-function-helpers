@@ -8,6 +8,7 @@ import logging
 import codecs
 import numpy as np
 from PIL import Image
+import requests
 
 DEFAULT_MAX_NVCF_MSG_SIZE = 5 * 1000 * 1000  # 5MB
 IMAGE_FORMAT = "JPEG"
@@ -17,6 +18,60 @@ b64_pattern = re.compile(
     "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$"
 )
 
+def upload_file(filename, url, headers, timeout=30):
+    """
+    Upload a file.
+
+    Returns a dictionary containing a "status_code" and "response".
+
+    A 200 or 201 status code will indicate a success.
+
+    Example Usage:
+        headers = { "Content-Type": "image/jpg" }
+        try:
+            reponse = upload.upload_file("image.jpg", some_s3_url, headers)
+        except:
+            # Handle exception
+            response = None
+
+        if response is not None and response["status_code"] in (200, 201):
+            # Success
+        else:
+            # Failure
+    """
+    with open(filename, "rb") as _f:
+        response = upload(_f, url, headers, timeout)
+
+    return response
+
+def upload(stream, url, headers, timeout=30):
+    """
+    Upload file/byte stream to S3.
+
+    Returns a dictionary containing a "status_code" and "response".
+
+    A 200 or 201 status code will indicate a success.
+
+    Example Usage:
+        headers = { "Content-Type": "image/jpg" }
+        try:
+            with open("image.jpg", "rb") as f:
+                response = upload.upload(_f, some_s3_url, headers)
+        except:
+            # Handle exception
+            response = None
+
+        if response is not None and response["status_code"] in (200, 201):
+            # Success
+        else:
+            # Failure
+    """
+    response = requests.put(url, headers=headers, data=stream, timeout=timeout)
+
+    return {
+        "status_code": response.status_code,
+        "response": response.text,
+    }
 
 def _uppercase_dict_keys(d: dict) -> dict:
     """
