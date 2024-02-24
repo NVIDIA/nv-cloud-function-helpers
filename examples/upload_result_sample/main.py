@@ -43,28 +43,16 @@ class PyTritonServer:
             asset_ids = helpers.get_asset_ids(request_parameters_dict)
             image_asset_id = req_data.get("image", None)[0].decode("utf-8")
             # get the result upload url
-            resultUploadUrl = request_parameters_dict.get(
-                "resultUploadUrl", None
+            resultUploadUrl = req_data.get("resultUploadUrl", None)[0].decode(
+                "utf-8"
             )
-
             self.logger.info("got values from inference request")
             # read the image from disk using image and input_path
             image = helpers.load_image(
                 image_asset_id, input_path, has_transparency=False
             )
             self.logger.info("starting inference")
-            # rotate the image 180 degrees, saving partial progress
-            for i in range(1, 181):
-                # rotate the image 1 degree
-                temp_image = image.rotate(i)
-                progress_scaled_to_100 = (i / 180) * 100
-                # update partial response
-                helpers.update_progress_file(
-                    request_parameters=request_parameters_dict,
-                    progress_value=progress_scaled_to_100,
-                    partial_response={},
-                )
-            image = temp_image
+            image = image.rotate(180)
             self.logger.info("inference done")
 
             # for this example we will not be returning the image with the response
@@ -74,7 +62,9 @@ class PyTritonServer:
                     f"resultUploadUrl not available, not uploading resulting image"
                 )
                 flag_uploaded = False
+            import pdb
 
+            pdb.set_trace()
             if self.flag_serialize_before_upload:
                 # this method saves the image to disk and uploads it to the provided url
                 # so storage on disk is required
@@ -197,6 +187,9 @@ class PyTritonServer:
                 infer_func=self._infer_fn,
                 inputs=[
                     Tensor(name="image", dtype=np.bytes_, shape=(-1,)),
+                    Tensor(
+                        name="resultUploadUrl", dtype=np.bytes_, shape=(-1,)
+                    ),
                 ],
                 outputs=[
                     Tensor(name="image_generated", dtype=np.bytes_, shape=(1,))
