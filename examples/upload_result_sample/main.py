@@ -62,9 +62,6 @@ class PyTritonServer:
                     f"resultUploadUrl not available, not uploading resulting image"
                 )
                 flag_uploaded = False
-            import pdb
-
-            pdb.set_trace()
             if self.flag_serialize_before_upload:
                 # this method saves the image to disk and uploads it to the provided url
                 # so storage on disk is required
