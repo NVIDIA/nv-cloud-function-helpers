@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+service Echo {
+    rpc EchoMessage (EchoRequest) returns (EchoReply) {}
+    rpc EchoMessageStreaming (stream EchoRequest) returns (stream EchoReply) {}
+}
+
+message EchoRequest {
+    string message = 1;
+}
+
+message EchoReply {
+    string message = 1;
+}
