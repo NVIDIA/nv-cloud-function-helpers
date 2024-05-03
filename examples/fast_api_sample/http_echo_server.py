@@ -4,13 +4,6 @@ import uvicorn
 from pydantic import BaseModel
 from fastapi import FastAPI, status
 from fastapi.responses import StreamingResponse
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor as TracingInstrumentor
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import (
-    OTLPSpanExporter,
-)
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 
 app = FastAPI()
@@ -51,13 +44,4 @@ async def echo(echo: Echo):
         return echo.message*echo.repeats
 
 if __name__ == "__main__":
-
-    resource = Resource(attributes={"service.name": "fastapi"})
-    provider = TracerProvider(resource=resource)
-    exporter = OTLPSpanExporter(endpoint=os.getenv('NVCF_TRACING_ENDPOINT_HTTP', 'http://localhost:4138/v1/traces'))
-    processor = BatchSpanProcessor(exporter)
-    provider.add_span_processor(processor)
-
-    TracingInstrumentor.instrument_app(app, tracer_provider=provider, excluded_urls="health")
-
     uvicorn.run(app, host="0.0.0.0", port=8000, workers=int(os.getenv('WORKER_COUNT', 500)))
