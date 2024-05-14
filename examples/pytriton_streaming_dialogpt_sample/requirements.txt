@@ -1,2 +1,0 @@
-nvidia-pytriton==0.5.1
-transformers==4.35.2
