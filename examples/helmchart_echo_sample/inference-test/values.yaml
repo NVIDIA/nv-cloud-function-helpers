@@ -1,0 +1,8 @@
+ngcImagePullSecretName: ""
+
+image:
+  repository: "stg.nvcr.io/nv-cf/guineapig-1/echo" # Replcae with your own container
+  tag: "latest"
+  pullPolicy: "IfNotPresent"
+
+inferencePort: 8000
