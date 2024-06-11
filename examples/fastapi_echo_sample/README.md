@@ -3,7 +3,7 @@
 ```bash
 docker build . -t fastapi_echo_sample
 ```
-To upload it to NGC refer to [here](https://developer.nvidia.com/docs/picasso/user-guide/latest/cloud-function/functions.html#preparing-your-container)
+To upload it to NGC refer to [here](https://docs.nvidia.com/cloud-functions/user-guide/latest/cloud-function/quickstart.html#clone-build-and-push-the-docker-image-to-ngc-private-registry)
 
 ## Invoke the sample locally
 ```bash 
