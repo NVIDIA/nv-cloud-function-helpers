@@ -10,7 +10,7 @@ COPY model_repository /model_repository
 ENV CUDA_MODULE_LOADING LAZY
 ENV LOG_VERBOSE 0
 
-CMD tritonserver --log-verbose ${LOG_VERBOSE} --http-header-forward-pattern (nvcf-.*|NVCF-.*) \
+CMD tritonserver --log-verbose ${LOG_VERBOSE} --http-header-forward-pattern nvcf-.* \
     --model-repository /model_repository/ --model-control-mode=none --strict-readiness 1 \
     --allow-metrics 1 --allow-gpu-metrics 1 --allow-cpu-metrics 1 --metrics-interval-ms 500 \
     --trace-config mode=opentelemetry --trace-config rate=1 --trace-config level=TIMESTAMPS \
