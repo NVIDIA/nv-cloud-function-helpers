@@ -8,7 +8,9 @@ import requests
 input_asset_filename = "df034fb3-ec73-4d92-a190-d85d797ab5f0"  # small enough to be returned
 # input_asset_filename = "rg034fb3-ec73-4d92-a190-d85d797ab5f0"  # too big to be returned
 
-url = f"http://localhost:8000/rotate_image"
+model_name = "sample_container"
+model_version = "1"
+url = f"http://localhost:8000/v2/models/{model_name}/infer"
 
 
 def encode_string(string_to_encode: str):
