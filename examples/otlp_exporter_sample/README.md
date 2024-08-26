@@ -314,8 +314,14 @@ The above should produce in the console something as below:
         }
     ]
 }
+```
+</details>
 
-# no collector running, will also generate
+When the collector is not properly running, it generates as output:
+
+<details>
+  <summary>Click me - error </summary>
+```
 {
     "body": "Failed to export traces to , error code: StatusCode.UNKNOWN",
     "severity_number": "<SeverityNumber.ERROR: 17>",
