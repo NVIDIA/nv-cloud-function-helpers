@@ -321,6 +321,7 @@ When the collector is not properly running, it generates as output:
 
 <details>
   <summary>Click me - error </summary>
+
 ```
 {
     "body": "Failed to export traces to , error code: StatusCode.UNKNOWN",
