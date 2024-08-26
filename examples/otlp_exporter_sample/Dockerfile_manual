@@ -1,0 +1,50 @@
+FROM nvcr.io/nvidia/cuda:12.5.0-devel-ubuntu22.04
+
+ENV WORKER_COUNT=5
+# add configuration for the otel collector
+ENV OTEL_VERSION=0.106.1
+ENV OTEL_TRACES_EXPORTER="otlp"
+ENV OTEL_LOGS_EXPORTER="otlp"
+ENV OTEL_METRICS_EXPORTER="otlp"
+ENV OTEL_EXPORTER_OTLP_PROTOCOL="grpc"
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
+
+WORKDIR /app
+
+# install the OpenTelemtry Collector
+RUN apt-get update
+RUN apt-get -y install wget systemctl git python3 python3-pip
+RUN wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v${OTEL_VERSION}/otelcol-contrib_${OTEL_VERSION}_linux_amd64.deb
+RUN dpkg -i otelcol-contrib_${OTEL_VERSION}_linux_amd64.deb
+
+COPY otel-collector-config.yaml /etc/otel-collector-config.yaml
+
+# install DCGM
+RUN apt-get update \
+    && apt-get install -y datacenter-gpu-manager
+RUN systemctl enable nvidia-dcgm
+
+# install go
+RUN wget https://go.dev/dl/go1.22.4.linux-amd64.tar.gz
+RUN rm -rf /usr/local/go && tar -C /usr/local -xzf go1.22.4.linux-amd64.tar.gz
+ENV PATH="${PATH}:/usr/local/go/bin"
+
+# install DCGM Exporter
+RUN git clone https://github.com/NVIDIA/dcgm-exporter.git
+RUN cd dcgm-exporter && make binary && make install
+COPY dcgm-config.csv /app/
+
+# install node exporter
+RUN wget https://github.com/prometheus/node_exporter/releases/download/v1.8.2/node_exporter-1.8.2.linux-amd64.tar.gz
+RUN tar xvfz node_exporter-1.8.2.linux-amd64.tar.gz
+RUN cd node_exporter-1.8.2.linux-amd64
+
+COPY requirements.txt ./
+
+RUN python3 -m pip install --no-cache-dir -U pip && \
+    python3 -m pip install --no-cache-dir -r requirements.txt
+
+COPY http_echo_server_manual.py /app/
+
+# see: https://github.com/open-telemetry/opentelemetry-python-contrib/issues/385
+CMD  ./node_exporter-1.8.2.linux-amd64/node_exporter & dcgm-exporter -f /app/dcgm-config.csv & otelcol-contrib --config /etc/otel-collector-config.yaml & uvicorn http_echo_server_manual:app --host=0.0.0.0 --workers=$WORKER_COUNT

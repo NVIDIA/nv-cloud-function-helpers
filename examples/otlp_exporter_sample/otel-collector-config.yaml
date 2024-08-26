@@ -1,0 +1,59 @@
+# https://grafana.com/docs/grafana-cloud/monitor-applications/application-observability/collector/opentelemetry-collector/
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: opentelemetry-collector
+          scrape_interval: 10s
+          static_configs:
+            - targets: [ 'localhost:8888' ]
+        - job_name: 'dcgm_exporter'
+          scrape_interval: 5s
+          static_configs:
+            - targets: [ 'localhost:9400' ]
+        - job_name: 'node_exporter'
+          scrape_interval: 5s
+          static_configs:
+            - targets: [ 'localhost:9100' ]
+
+processors:
+  batch:
+
+extensions:
+  basicauth/otlp:
+    client_auth:
+      username: ${env:GrafanaInstanceID}
+      password: ${env:GrafanaCloudToken}
+
+exporters:
+  debug:
+    verbosity: basic
+    sampling_initial: 5
+    sampling_thereafter: 200
+  otlphttp:
+    auth:
+      authenticator: basicauth/otlp
+    endpoint: ${env:GrafanaEndpoint}
+
+    tls:
+      insecure_skip_verify: true
+
+service:
+  telemetry:
+    metrics:
+      address: localhost:8888
+  extensions: [basicauth/otlp]
+  pipelines:
+    metrics:
+      receivers: [otlp,prometheus]
+      exporters: [otlphttp]
+    traces:
+      receivers: [otlp]
+      exporters: [otlphttp]
+    logs:
+      receivers: [otlp]
+      exporters: [otlphttp]
