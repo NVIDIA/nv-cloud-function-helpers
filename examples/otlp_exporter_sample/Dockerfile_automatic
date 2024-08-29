@@ -1,8 +1,8 @@
 FROM nvcr.io/nvidia/cuda:12.5.0-devel-ubuntu22.04
 
-ENV WORKER_COUNT=5
 # add configuration for the otel collector
-ENV OTEL_VERSION=0.106.1
+# had problems with basicauth extensions for version above 0.100.0
+ENV OTEL_VERSION=0.100.0
 ENV OTEL_TRACES_EXPORTER="otlp"
 ENV OTEL_LOGS_EXPORTER="otlp"
 ENV OTEL_METRICS_EXPORTER="otlp"
@@ -50,4 +50,4 @@ RUN python3 -m pip install --no-cache-dir -U pip && \
 COPY http_echo_server_automatic.py /app/
 
 # see: https://github.com/open-telemetry/opentelemetry-python-contrib/issues/385
-CMD  ./node_exporter-1.8.2.linux-amd64/node_exporter & dcgm-exporter -f /app/dcgm-config.csv & otelcol-contrib --config /etc/otel-collector-config.yaml & opentelemetry-instrument gunicorn http_echo_server_automatic:app -k uvicorn.workers.UvicornWorker
+CMD  ./node_exporter-1.8.2.linux-amd64/node_exporter & dcgm-exporter -f /app/dcgm-config.csv & otelcol-contrib --config /etc/otel-collector-config.yaml & opentelemetry-instrument python3 http_echo_server_automatic.py

@@ -71,11 +71,7 @@ async def echo(echo: Echo):
 if __name__ == "__main__":
     resource = Resource(attributes={"service.name": "fastapi"})
     provider = TracerProvider(resource=resource)
-    exporter = OTLPSpanExporter(
-        endpoint=os.getenv(
-            "NVCF_TRACING_ENDPOINT_HTTP", "http://localhost:4138/v1/traces"
-        )
-    )
+    exporter = OTLPSpanExporter()
     processor = BatchSpanProcessor(exporter)
     provider.add_span_processor(processor)
 
@@ -83,6 +79,4 @@ if __name__ == "__main__":
         app, tracer_provider=provider, excluded_urls="health"
     )
 
-    uvicorn.run(
-        app, host="0.0.0.0", port=8000, workers=int(os.getenv("WORKER_COUNT", 5))
-    )
+    uvicorn.run(app, host="0.0.0.0", port=8000)

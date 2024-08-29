@@ -56,6 +56,4 @@ async def echo(echo: Echo):
 
 
 if __name__ == "__main__":
-    uvicorn.run(
-        app, host="0.0.0.0", port=8000, workers=int(os.getenv("WORKER_COUNT", 5))
-    )
+    uvicorn.run(app, host="0.0.0.0", port=8000)
