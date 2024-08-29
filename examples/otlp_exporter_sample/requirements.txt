@@ -5,7 +5,8 @@ grpcio-reflection==1.59.3
 fastapi==0.110.0
 uvicorn==0.29.0
 gunicorn
-opentelemetry-exporter-otlp==1.23.0
+opentelemetry-distro
+opentelemetry-exporter-otlp
 opentelemetry-instrumentation-fastapi
 opentelemetry-instrumentation-grpc
 opentelemetry-instrumentation-logging

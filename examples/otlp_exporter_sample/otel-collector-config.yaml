@@ -26,8 +26,11 @@ processors:
 extensions:
   basicauth/otlp:
     client_auth:
-      username: ${env:GrafanaInstanceID}
+      username: "${env:GrafanaInstanceID}"
       password: ${env:GrafanaCloudToken}
+
+connectors:
+  spanmetrics: {}
 
 exporters:
   debug:
@@ -39,6 +42,7 @@ exporters:
       authenticator: basicauth/otlp
     endpoint: ${env:GrafanaEndpoint}
 
+
     tls:
       insecure_skip_verify: true
 
@@ -49,11 +53,11 @@ service:
   extensions: [basicauth/otlp]
   pipelines:
     metrics:
-      receivers: [otlp,prometheus]
+      receivers: [otlp,prometheus,spanmetrics]
       exporters: [otlphttp]
     traces:
       receivers: [otlp]
-      exporters: [otlphttp]
+      exporters: [otlphttp,spanmetrics]
     logs:
       receivers: [otlp]
       exporters: [otlphttp]

@@ -114,12 +114,11 @@ class Echo(BaseModel):
 
 @app.post("/echo")
 async def echo(echo: Echo):
+    logging.warning("echo request: %s", echo.message)
+    echo_requests_total.add(1, attributes={"http.method": "POST"})
     with tracer.start_as_current_span("echo") as span:
-        logging.warning("echo request: %s", echo.message)
         span.set_attribute("http.method", "POST")
         if echo.stream:
-            echo_requests_total.add(1, attributes={"http.method": "POST"})
-            get_logger_provider().get_logger("my_stream").emit("echo", echo)
 
             def stream_text():
                 for _ in range(echo.repeats):
