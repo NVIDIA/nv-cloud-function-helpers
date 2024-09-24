@@ -8,15 +8,15 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.instrumentation.fastapi import (
     FastAPIInstrumentor as TracingInstrumentor,
 )
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import (
-    OTLPSpanExporter,
-)
+
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 from opentelemetry.instrumentation.logging import LoggingInstrumentor
 
-LoggingInstrumentor().instrument()
+LoggingInstrumentor().instrument(set_logging_format=True)
 
 app = FastAPI()
 
@@ -71,7 +71,7 @@ async def echo(echo: Echo):
 if __name__ == "__main__":
     resource = Resource(attributes={"service.name": "fastapi"})
     provider = TracerProvider(resource=resource)
-    exporter = OTLPSpanExporter()
+    exporter = OTLPSpanExporter(endpoint=os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT"))
     processor = BatchSpanProcessor(exporter)
     provider.add_span_processor(processor)
 

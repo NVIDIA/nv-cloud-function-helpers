@@ -3,14 +3,20 @@ receivers:
   otlp:
     protocols:
       grpc:
+        endpoint: "localhost:4320"
       http:
+        endpoint: "localhost:4319"
+  filelog:
+    include: [/app/my_echo_log.log]
+    start_at: beginning
+
   prometheus:
     config:
       scrape_configs:
         - job_name: opentelemetry-collector
           scrape_interval: 10s
           static_configs:
-            - targets: [ 'localhost:8888' ]
+            - targets: [ 'localhost:8890' ]
         - job_name: 'dcgm_exporter'
           scrape_interval: 5s
           static_configs:
@@ -22,6 +28,47 @@ receivers:
 
 processors:
   batch:
+  resource:
+    attributes:
+      - key: host.name
+        value: ${env:HOSTNAME}
+        action: insert
+      - key: function.id
+        value: ${env:NVCF_FUNCTION_ID}
+        action: insert
+      - key: function.version.id
+        value: ${env:NVCF_FUNCTION_VERSION_ID}
+        action: insert
+      - key: nca.id
+        value: ${env:NVCF_NCA_ID}
+        action: insert
+      - key: function.name
+        value: ${env:NVCF_FUNCTION_NAME}
+        action: insert
+  metricstransform:
+    transforms:
+      - include: ^.*$
+        match_type: regexp
+        action: update
+        operations:
+          - action: add_label
+            new_label: service_name
+            new_value: ${env:OTEL_SERVICE_NAME}
+          - action: add_label
+            new_label: host_name
+            new_value: ${env:HOSTNAME}
+          - action: add_label
+            new_label: function.id
+            new_value: ${env:NVCF_FUNCTION_ID}
+          - action: add_label
+            new_label: function.name
+            new_value: ${env:NVCF_FUNCTION_NAME}
+          - action: add_label
+            new_label: function.version.id
+            new_value: ${env:NVCF_FUNCTION_VERSION_ID}
+          - action: add_label
+            new_label: nca.id
+            new_value: ${env:NVCF_NCA_ID}
 
 extensions:
   basicauth/otlp:
@@ -34,30 +81,33 @@ connectors:
 
 exporters:
   debug:
-    verbosity: basic
+    verbosity: normal
     sampling_initial: 5
     sampling_thereafter: 200
   otlphttp:
     auth:
       authenticator: basicauth/otlp
     endpoint: ${env:GrafanaEndpoint}
-
-
     tls:
       insecure_skip_verify: true
 
 service:
   telemetry:
     metrics:
-      address: localhost:8888
+      address: localhost:8890
+    logs:
+      level: INFO
   extensions: [basicauth/otlp]
   pipelines:
     metrics:
       receivers: [otlp,prometheus,spanmetrics]
+      processors: [batch, metricstransform]
       exporters: [otlphttp]
     traces:
       receivers: [otlp]
+      processors: [batch]
       exporters: [otlphttp,spanmetrics]
     logs:
-      receivers: [otlp]
+      receivers: [otlp, filelog]
+      processors: [batch, resource]
       exporters: [otlphttp]
