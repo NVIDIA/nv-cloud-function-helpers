@@ -17,19 +17,14 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 
 # logs
 import logging
-from opentelemetry.sdk._logs.export import (
-    SimpleLogRecordProcessor,
-    ConsoleLogExporter,
-)
 from opentelemetry.exporter.otlp.proto.grpc._log_exporter import (
     OTLPLogExporter,
 )
-from opentelemetry._logs import set_logger_provider, get_logger_provider
+from opentelemetry._logs import set_logger_provider
 from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
 from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
 
 # otlp metrics
-from opentelemetry import metrics
 from opentelemetry.metrics import get_meter_provider, set_meter_provider
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.metrics.export import (
@@ -49,10 +44,13 @@ handler = None
 
 def init_observability():
     global echo_requests_total, tracer, handler
-    resource = Resource(attributes={"service.name": "echo-manual"})
+    # https://opentelemetry.io/docs/languages/sdk-configuration/general/#otel_resource_attributes
+    resource = Resource(
+        attributes={"service.name": os.getenv("OTEL_SERVICE_NAME", "http-echo")}
+    )
     tracer_provider = TracerProvider(resource=resource)
 
-    trace_exporter = OTLPSpanExporter()
+    trace_exporter = OTLPSpanExporter(endpoint=os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT"))
     processor = BatchSpanProcessor(trace_exporter)
     tracer_provider.add_span_processor(processor)
     trace.set_tracer_provider(tracer_provider)
@@ -68,7 +66,7 @@ def init_observability():
     reader = PeriodicExportingMetricReader(
         metric_exporter, export_interval_millis=60_000
     )
-    meter_provider = MeterProvider(metric_readers=[reader])
+    meter_provider = MeterProvider(metric_readers=[reader], resource=resource)
     set_meter_provider(meter_provider)
     meter = get_meter_provider().get_meter("my_meeter")
     echo_requests_total = meter.create_counter(
@@ -78,6 +76,7 @@ def init_observability():
 
 init_observability()
 logging.getLogger().addHandler(handler)
+logging.getLogger().setLevel(logging.INFO)
 
 
 class HealthCheck(BaseModel):
@@ -102,6 +101,9 @@ def get_health() -> HealthCheck:
     Returns:
         HealthCheck: Returns a JSON response with the health status
     """
+    with open("my_echo_log.log", "a") as myfile:
+        myfile.write("health echo service OK")
+
     return HealthCheck(status="OK")
 
 
@@ -112,12 +114,26 @@ class Echo(BaseModel):
     stream: bool = False
 
 
-@app.post("/echo")
+@app.post("/echo", status_code=status.HTTP_200_OK)
 async def echo(echo: Echo):
-    logging.warning("echo request: %s", echo.message)
-    echo_requests_total.add(1, attributes={"http.method": "POST"})
+    logging.info("echo request: %s", echo.message)
+    echo_requests_total.add(
+        1,
+        attributes={
+            "http.method": "POST",
+            "http.status.code": str(status.HTTP_200_OK),
+            "instance.id": os.getenv("INSTANCE_ID", "not set"),
+        },
+    )
     with tracer.start_as_current_span("echo") as span:
-        span.set_attribute("http.method", "POST")
+        span.set_attributes(
+            {
+                "http.method": "POST",
+                "http.status.code": status.HTTP_200_OK,
+                "instance.id": os.getenv("INSTANCE_ID", "not set"),
+            }
+        )
+        span.set_status(trace.StatusCode.OK)
         if echo.stream:
 
             def stream_text():
@@ -128,6 +144,7 @@ async def echo(echo: Echo):
             return StreamingResponse(stream_text(), media_type="text/event-stream")
         else:
             time.sleep(echo.delay)
+            logging.info("echo request answer: %s", echo.message)
             return echo.message * echo.repeats
 
 

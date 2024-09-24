@@ -3,18 +3,19 @@ FROM nvcr.io/nvidia/cuda:12.5.0-devel-ubuntu22.04
 ENV WORKER_COUNT=5
 # add configuration for the otel collector
 # had problems with basicauth extensions for version above 0.100.0
-ENV OTEL_VERSION=0.100.0
+ENV OTEL_VERSION=0.108.0
 ENV OTEL_TRACES_EXPORTER="otlp"
 ENV OTEL_LOGS_EXPORTER="otlp"
 ENV OTEL_METRICS_EXPORTER="otlp"
 ENV OTEL_EXPORTER_OTLP_PROTOCOL="grpc"
-ENV OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4320"
 
 WORKDIR /app
 
 # install the OpenTelemtry Collector
 RUN apt-get update
 RUN apt-get -y install wget systemctl git python3 python3-pip
+
 RUN wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v${OTEL_VERSION}/otelcol-contrib_${OTEL_VERSION}_linux_amd64.deb
 RUN dpkg -i otelcol-contrib_${OTEL_VERSION}_linux_amd64.deb
 
@@ -38,7 +39,6 @@ COPY dcgm-config.csv /app/
 # install node exporter
 RUN wget https://github.com/prometheus/node_exporter/releases/download/v1.8.2/node_exporter-1.8.2.linux-amd64.tar.gz
 RUN tar xvfz node_exporter-1.8.2.linux-amd64.tar.gz
-RUN cd node_exporter-1.8.2.linux-amd64
 
 COPY requirements.txt ./
 

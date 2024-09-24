@@ -2,13 +2,13 @@ FROM nvcr.io/nvidia/cuda:12.5.0-devel-ubuntu22.04
 
 # add configuration for the otel collector
 # had problems with basicauth extensions for version above 0.100.0
-ENV OTEL_VERSION=0.100.0
+ENV OTEL_VERSION=0.108.0
 ENV OTEL_TRACES_EXPORTER="otlp"
 ENV OTEL_LOGS_EXPORTER="otlp"
 ENV OTEL_METRICS_EXPORTER="otlp"
 ENV OTEL_EXPORTER_OTLP_PROTOCOL="grpc"
 ENV OTEL_SERVICE_NAME="echo_automatic"
-ENV OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4320"
 
 ENV OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true
 
