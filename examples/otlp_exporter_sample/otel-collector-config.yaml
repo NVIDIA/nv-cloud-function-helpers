@@ -109,5 +109,5 @@ service:
       exporters: [otlphttp,spanmetrics]
     logs:
       receivers: [otlp, filelog]
-      processors: [batch] #, resource]
+      processors: [batch, resource]
       exporters: [otlphttp]
