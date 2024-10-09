@@ -37,7 +37,7 @@ if __name__ == "__main__":
     iface = gr.Interface(fn=send_request,
                          inputs=[
                              gr.Textbox(label="url", value="192.168.2.101:8001"),
-                             gr.Textbox(label="access_token"),
+                             gr.Textbox(label="access_token", type="password"),
                              gr.Textbox(label="function_id"),
                              gr.Textbox(label="function_version_id"),
                              gr.Textbox(label="message"),
