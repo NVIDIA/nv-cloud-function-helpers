@@ -1,24 +1,22 @@
 apiVersion: monitoring.coreos.com/v1
-kind: PodMonitor
+kind: ServiceMonitor
 metadata:
     labels:
         app.kubernetes.io/component: metrics
         app.kubernetes.io/instance: prometheus-agent
-        app.kubernetes.io/name: metrics-nvca-operator
-        jobLabel: metrics-nvca-operator
+        app.kubernetes.io/name: metrics-nvca
+        jobLabel: metrics-nvca
         release: prometheus-agent
-        prometheus.agent/podmonitor-discover: "true"
-    name: metrics-nvca-operator
+        prometheus.agent/servicemonitor-discover: "true"
+    name: prometheus-agent-nvca
     namespace: monitoring
 spec:
-    podMetricsEndpoints:
-    - port: http
-      scheme: http
-      path: /metrics
+    endpoints:
+    - port: nvca
     jobLabel: jobLabel
     selector:
         matchLabels:
-            app.kubernetes.io/name: nvca-operator
+            app.kubernetes.io/name: nvca
     namespaceSelector:
         matchNames:
-        - nvca-operator
+        - nvca-system
