@@ -5,6 +5,7 @@ This is a simple [OpenTelemetry Collector](https://github.com/open-telemetry/ope
 # Prerequisites
 * Have NVCA running on your cluster
 * Have the GPU operator running on your cluster with dcgm exporter
+* Have the [Prometheus Operator](https://prometheus-operator.dev/docs/getting-started/installation/) installed on your cluster
 
 # Steps
 1. Create monitoring namespace if not created.
