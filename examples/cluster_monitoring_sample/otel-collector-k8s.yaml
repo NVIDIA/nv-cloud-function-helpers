@@ -29,10 +29,10 @@ data:
           network:
           load:
           processes:
-
       prometheus:
         config:
           scrape_configs:
+# Note: dcgm-metrics scrape configuration is only applicable when using Dynamic Instance Configuration. If using Manual Instance Configuration, remove this scrape configuration.
             - job_name: dcgm-metrics
               scrape_interval: 5s
               metrics_path: /metrics
@@ -88,6 +88,7 @@ data:
       debug:
         verbosity: basic
 
+# Modify this collector exporter section to use your monitoring provider
       otlp/lightstep:
         endpoint: ${LIGHTSTEP_ENDPOINT}
         headers:
@@ -101,6 +102,7 @@ data:
           exporters: [debug, otlp/lightstep]
 
 ---
+# Update this Lightstep credentials section with your Lightstep endpoint and access token
 apiVersion: v1
 kind: Secret
 metadata:
