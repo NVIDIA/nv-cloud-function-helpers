@@ -407,3 +407,27 @@ def save_image_with_directory(
     else:
         image.save(save_path, image_format)
     return save_path
+
+
+def get_secrets() -> dict:
+    """
+    Reads secrets from the secrets.json file located at /var/secrets/secrets.json.
+    The secrets file should be a JSON file containing key-value pairs.
+
+    Documentation: https://docs.nvidia.com/cloud-functions/user-guide/latest/cloud-function/secrets.html
+    
+    Returns:
+        dict: A dictionary containing the secrets
+        
+    Raises:
+        FileNotFoundError: If the secrets file doesn't exist
+        json.JSONDecodeError: If the secrets file contains invalid JSON
+    """
+    try:
+        with open(SECRETS_PATH, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Secrets file not found at {SECRETS_PATH}")
+    except json.JSONDecodeError as e:
+        raise json.JSONDecodeError(f"Invalid JSON in secrets file: {str(e)}", e.doc, e.pos)
+
