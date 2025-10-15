@@ -1,8 +1,8 @@
 ngcImagePullSecretName: ""
 
 image:
-  repository: "stg.nvcr.io/nv-cf/guineapig-1/echo" # Replcae with your own container
-  tag: "latest"
+  repository: nvcr.io/0743942600448376/avinference/zhenweih_fastapi_echo_sample
+  tag: "5"
   pullPolicy: "IfNotPresent"
 
 inferencePort: 8000

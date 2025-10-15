@@ -16,12 +16,19 @@ spec:
         app.kubernetes.io/name: {{ .Release.Name }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+      volumes:
+      - name: storage
+        persistentVolumeClaim:
+          claimName: cache-pvc
       imagePullSecrets:
         - name: {{ .Values.ngcImagePullSecretName }}
       containers:
       - name: inference
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts:
+        - mountPath: /storage
+          name: storage
         ports:
         - name: inference
           containerPort: {{ .Values.inferencePort }}
