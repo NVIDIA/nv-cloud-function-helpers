@@ -1,0 +1,28 @@
+# Agent Collector - 抓取 Triton Prometheus metrics 并转发到 Gateway
+
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'triton-server'
+          scrape_interval: 5s
+          static_configs:
+            - targets: ['127.0.0.1:8002']
+
+processors:
+  batch:
+    timeout: 10s
+
+exporters:
+  otlphttp:
+    endpoint: ${env:OTEL_EXPORTER_OTLP_ENDPOINT}
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      processors: [batch]
+      exporters: [otlphttp]
+

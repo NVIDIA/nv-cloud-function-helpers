@@ -8,11 +8,15 @@ import requests
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
-from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
+from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
 from opentelemetry.metrics import get_meter_provider, set_meter_provider
 
 
 app = FastAPI()
+
+# Initialize metrics variables
+echo_requests_total = None
+
 
 class HealthCheck(BaseModel):
     status: str = "OK"
@@ -31,9 +35,7 @@ class Echo(BaseModel):
 
 @app.post("/echo")
 async def echo(echo: Echo):
-    echo_requests_total.add(1)
-    active_connections.inc()
-    
+    echo_requests_total.add(1, attributes={"http.method": "POST", "http.status.code": str(status.HTTP_200_OK)})
     if echo.url:
         try:
             response = requests.get(echo.url)
@@ -60,11 +62,8 @@ async def echo(echo: Echo):
                 yield f"data: {echo.message}\n\n"
         return StreamingResponse(stream_text(), media_type="text/event-stream")
     else:
-        start = time.time()
         time.sleep(echo.delay)
         result = echo.message*echo.repeats
-        response_time.observe(time.time() - start)
-        active_connections.dec()
         return result
 
 
@@ -79,7 +78,9 @@ def init_observability():
     set_meter_provider(meter_provider)
     meter = get_meter_provider().get_meter("my_meeter")
     echo_requests_total = meter.create_counter(
-        "echo_requests_total", "counter", "Total number of echo requests"
+        "echo_requests_total",
+        unit="1",  # Use "1" for dimensionless counters, or "" for no unit
+        description="Total number of echo requests"
     )
 
 

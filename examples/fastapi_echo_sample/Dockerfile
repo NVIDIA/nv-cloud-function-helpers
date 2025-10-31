@@ -1,4 +1,4 @@
-FROM python:3.10.13-bookworm
+FROM python:3.13.7-bookworm
 
 ENV WORKER_COUNT=10
 
@@ -11,4 +11,4 @@ RUN python -m pip install --no-cache-dir -U pip && \
 
 COPY http_echo_server.py /app/
 
-CMD uvicorn http_echo_server:app --host=0.0.0.0 --workers=$WORKER_COUNT
+CMD python /app/http_echo_server.py

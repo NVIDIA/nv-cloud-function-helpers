@@ -1,0 +1,63 @@
+# Gateway Collector Configuration for Triton Server
+# 作用：中心化收集器，接收来自 Agent Collector 的 Prometheus metrics
+
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: "0.0.0.0:4318"  # HTTP 接收来自 Agent Collector 的 Prometheus metrics
+
+processors:
+  batch:
+    timeout: 30s
+    send_batch_size: 2048
+    send_batch_max_size: 4096
+  
+  # Gateway 级别的统一处理
+  resource:
+    attributes:
+      - key: gateway.name
+        value: "triton-gateway-collector"
+        action: insert
+      - key: cluster.name
+        value: "local-cluster"
+        action: insert
+  
+  # 内存限制保护
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 512
+    spike_limit_mib: 128
+
+exporters:
+  # 最终导出到控制台（调试用）
+  debug:
+    verbosity: detailed
+  
+  # 可以导出到多个目标
+  # 导出到 Prometheus Remote Write（示例）
+  # prometheusremotewrite:
+  #   endpoint: http://prometheus:9090/api/v1/write
+  #   tls:
+  #     insecure: true
+  
+  # 导出到 Grafana Cloud（示例，需要配置环境变量）
+  # otlphttp:
+  #   endpoint: ${env:GRAFANA_OTLP_ENDPOINT}
+  #   auth:
+  #     authenticator: basicauth/grafana
+
+# 认证扩展（如果需要）
+# extensions:
+#   basicauth/grafana:
+#     client_auth:
+#       username: ${env:GRAFANA_INSTANCE_ID}
+#       password: ${env:GRAFANA_API_KEY}
+
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resource]
+      exporters: [debug]
+

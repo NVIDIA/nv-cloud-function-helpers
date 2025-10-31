@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # Triton Server 服务（内置 Agent Collector）
+  triton-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: triton-server
+    ports:
+      - "8000:8000"  # Triton HTTP
+      - "8001:8001"  # Triton gRPC
+      - "8002:8002"  # Triton Metrics
+    environment:
+      - LOG_VERBOSE=0
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://gateway-collector:4318
+    depends_on:
+      - gateway-collector
+    networks:
+      - otel-network
+
+  # Gateway Collector - 中心化收集器（聚合来自 Triton Server 内 Agent 的数据）
+  gateway-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: gateway-collector
+    command: 
+      - "--config=/etc/gateway-collector-config.yaml"
+    volumes:
+      - ./gateway-collector-config.yaml:/etc/gateway-collector-config.yaml
+    ports:
+      - "5318:4318"   # OTLP HTTP receiver (接收 Agent Collector 的 metrics)
+      - "9888:8888"   # Gateway 自身的 metrics
+    networks:
+      - otel-network
+
+networks:
+  otel-network:
+    driver: bridge
+
