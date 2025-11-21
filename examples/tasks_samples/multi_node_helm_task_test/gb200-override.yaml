@@ -1,0 +1,22 @@
+helmChartServiceName: multi-node-task-test
+nodesPerInstance: 4
+
+image:
+  repository: nvcr.io/qdrlnbkss8u1/nccl-multi-node-task-test
+  pullPolicy: Always
+  tag: "0.1.9"
+
+resources:
+ limits:
+    nvidia.com/gpu: 4
+    vpc.amazonaws.com/efa: 4
+ requests:
+    nvidia.com/gpu: 4
+    vpc.amazonaws.com/efa: 4
+
+podAnnotations:
+  disable-auto-efa: "true"
+
+securityContext:
+  capabilities:
+    add: ["IPC_LOCK"]

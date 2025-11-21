@@ -1,0 +1,35 @@
+# Default values for multi-node-task-test.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# To be injected by NVCF
+helmChartServiceName: "multi-node-task-test"
+ngcImagePullSecretName: ""
+nvctNcaId: ""
+nvctTaskId: ""
+nvctTaskName: ""
+nvctResultsDir: ""
+nvctProgressFilePath: ""
+
+# Maps to NODES_PER_INSTANCE environment variable in the container
+nodesPerInstance: 2
+
+resources:
+ limits:
+    nvidia.com/gpu: 1
+ requests:
+    nvidia.com/gpu: 1
+
+image:
+  repository: nvcr.io/qdrlnbkss8u1/nccl-multi-node-task-test
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "0.0.1"
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""

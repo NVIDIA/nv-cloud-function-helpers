@@ -1,5 +1,0 @@
-Pillow==10.0.0
-gradio==3.9.1
-httpx==0.24.1
-nvidia-pytriton==0.5.1
-sseclient-py==1.8.0

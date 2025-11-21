@@ -1,0 +1,13 @@
+helmChartServiceName: "multi-node-test"
+nodesPerInstance: 2
+
+image:
+  repository: nvcr.io/qdrlnbkss8u1/nccl-multi-node-test
+  pullPolicy: Always
+  tag: "0.0.25"
+
+resources:
+ limits:
+    nvidia.com/gpu: 8
+ requests:
+    nvidia.com/gpu: 8

@@ -1,0 +1,26 @@
+# provided on startup automatically by NVCF
+ngcImagePullSecretName: ""
+nvctNcaId: ""
+nvctTaskId: ""
+nvctTaskName: ""
+nvctResultsDir: ""
+nvctProgressFilePath: ""
+
+# BYOO settings, provided by NVCF
+otelExporterOtlpLogsEndpoint: ""
+otelExporterOtlpMetricsEndpoint: ""
+otelExporterOtlpTracesEndpoint: ""
+otelExporterOtlpLogsProtocol: ""
+otelExporterOtlpMetricsProtocol: ""
+otelExporterOtlpTracesProtocol: ""
+
+image:
+  repository: "nvcr.io/guineapig-1/task_byoo_sample" # replace with your own container
+  tag: "latest"
+  pullPolicy: "Always"
+
+resources:
+ limits:
+    nvidia.com/gpu: 1
+ requests:
+    nvidia.com/gpu: 1
