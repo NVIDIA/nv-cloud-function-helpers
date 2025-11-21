@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "multi-node-test.name" . }}-headless
+  labels:
+    {{- include "multi-node-test.labels" . | nindent 4 }}
+spec:
+  clusterIP: None # Set to None to make the service headless
+  selector:
+    {{- include "multi-node-test.selectorLabels" . | nindent 4 }}
+  ports:
+  - port: 8000 # Define the port as needed
+    targetPort: 8000
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.helmChartServiceName }}
+  labels:
+    {{- include "multi-node-test.labels" . | nindent 4 }}
+spec:
+  selector:
+    apps.kubernetes.io/pod-index: "0"
+    {{- include "multi-node-test.selectorLabels" . | nindent 4 }}
+  ports:
+  - port: 8000 # Define the port as needed
+    targetPort: 8000

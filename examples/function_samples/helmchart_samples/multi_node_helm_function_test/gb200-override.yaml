@@ -1,0 +1,22 @@
+helmChartServiceName: "multi-node-test"
+nodesPerInstance: 2
+
+image:
+  repository: nvcr.io/qdrlnbkss8u1/nccl-multi-node-test
+  pullPolicy: Always
+  tag: "0.1.2"
+
+resources:
+ limits:
+    nvidia.com/gpu: 4
+    vpc.amazonaws.com/efa: 4
+ requests:
+    nvidia.com/gpu: 4
+    vpc.amazonaws.com/efa: 4
+
+podAnnotations:
+  disable-auto-efa: "true"
+
+securityContext:
+  capabilities:
+    add: ["IPC_LOCK"]

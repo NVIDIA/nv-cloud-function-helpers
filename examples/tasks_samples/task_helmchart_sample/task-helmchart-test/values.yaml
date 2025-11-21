@@ -1,0 +1,12 @@
+# provided on startup automatically by NVCF
+ngcImagePullSecretName: ""
+nvctNcaId: ""
+nvctTaskId: ""
+nvctTaskName: ""
+nvctResultsDir: ""
+nvctProgressFilePath: ""
+
+image:
+  repository: "nvcr.io/guineapig-1/task_simple_sample" # replace with your own container
+  tag: "latest"
+  pullPolicy: "Always"

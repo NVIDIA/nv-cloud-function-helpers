@@ -27,7 +27,3 @@ docker buildx build --platform linux/amd64,linux/arm64 -t my_image_name .
 ```
 
 Please see additional reference material [here](https://docs.docker.com/build/building/multi-platform/#cross-compilation).
-
-## Localhost Smoke Tests
-The [local_deployment_test/](./local_deployment_test) folder 
-has a validation tool that can test docker containers readiness to be deployed to NVCF.

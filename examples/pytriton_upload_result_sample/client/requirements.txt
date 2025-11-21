@@ -1,4 +1,0 @@
-numpy
-boto3
-requests
-pillow
