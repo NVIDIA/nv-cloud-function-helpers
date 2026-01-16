@@ -1,7 +1,7 @@
 # FastAPI Sample
 ## Build the sample container
 ```bash
-docker build . -t fastapi_streaming_sample
+docker buildx build --platform linux/amd64,linux/arm64 -t fastapi_streaming_sample .
 ```
 To upload it to NGC refer to [here](https://docs.nvidia.com/cloud-functions/user-guide/latest/cloud-function/quickstart.html#clone-build-and-push-the-docker-image-to-ngc-private-registry)
 

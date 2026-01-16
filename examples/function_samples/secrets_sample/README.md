@@ -1,7 +1,7 @@
 # Secrets Sample
 ## Build the sample container
 ```bash
-docker build . -t secrets_sample
+docker buildx build --platform linux/amd64,linux/arm64 -t secrets_sample .
 ```
 To upload it to NGC refer to [here](https://docs.nvidia.com/cloud-functions/user-guide/latest/cloud-function/quickstart.html#clone-build-and-push-the-docker-image-to-ngc-private-registry)
 
