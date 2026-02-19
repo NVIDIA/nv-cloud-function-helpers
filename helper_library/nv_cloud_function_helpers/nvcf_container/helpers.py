@@ -13,6 +13,7 @@ import requests
 DEFAULT_MAX_NVCF_MSG_SIZE = 5 * 1000 * 1000  # 5MB
 IMAGE_FORMAT = "JPEG"
 IMAGE_QUALITY = 90
+SECRETS_PATH = "/var/secrets/secrets.json"
 
 b64_pattern = re.compile(
     "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$"
@@ -268,7 +269,7 @@ def get_function_name(request_parameters: dict) -> str:
     :return: function name string
     """
     request_parameters = _uppercase_dict_keys(request_parameters)
-    return request_parameters.get("NVCF-FUNCTION-ID", "")
+    return request_parameters.get("NVCF-FUNCTION-NAME", "")
 
 
 def get_config_value(value_name: str, model_config: dict = None) -> str:
@@ -430,4 +431,3 @@ def get_secrets() -> dict:
         raise FileNotFoundError(f"Secrets file not found at {SECRETS_PATH}")
     except json.JSONDecodeError as e:
         raise json.JSONDecodeError(f"Invalid JSON in secrets file: {str(e)}", e.doc, e.pos)
-

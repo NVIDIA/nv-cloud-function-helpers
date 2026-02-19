@@ -6,24 +6,28 @@ This repository contains examples, tests, and a library to ensure a smooth deplo
 The package `nvcf_container` provide Python functions that simplify common tasks within containers deployed inside  
 [NVIDIA Cloud Functions](https://docs.nvidia.com/cloud-functions/user-guide/latest/cloud-function/overview.html)
 
-## Package Installation
-
-```bash
-pip3 install setuptools
-
-pip3 install .
-```
-
 ## Container Examples
-The [examples/](./examples) folder has sample containers to be built and used as functions. 
-They include a client app that interfaces with each function sample.
+The [examples/](./examples) folder has sample containers to be built and used as functions or tasks.
 
-### Building for multiple compute architectures
-If both `amd/64` and `arm/64` support is required, Docker can be used to support multi-platform images. 
-Here is a sample command:
+## Agent Skills
+This repository includes reusable agent skills in [skills/](./skills). The format is based on the open Agent Skills specification:
+[https://agentskills.io/home](https://agentskills.io/home).
+
+- [NGC Cloud Functions CLI Skill](./skills/nvcf-ngc-cli-skill/SKILL.md): Guidance for using NGC CLI with NVCF functions, tasks, clusters, GPUs, and the NGC registry as well as invoking functions and debugging deployment errors.
+- Additional workflows are in [examples.md](./skills/nvcf-ngc-cli-skill/examples.md).
+
+### Add this skill to Claude
+Create a local skills directory for Claude and copy this skill into it:
 
 ```bash
-docker buildx build --platform linux/amd64,linux/arm64 -t my_image_name .
+mkdir -p ~/.claude/skills
+cp -R ./skills/nvcf-ngc-cli-skill ~/.claude/skills/
 ```
 
-Please see additional reference material [here](https://docs.docker.com/build/building/multi-platform/#cross-compilation).
+### Add this skill to Cursor
+Create a local skills directory for Cursor and copy this skill into it:
+
+```bash
+mkdir -p ~/.cursor/skills
+cp -R ./skills/nvcf-ngc-cli-skill ~/.cursor/skills/
+```
