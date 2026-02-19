@@ -268,7 +268,7 @@ def get_function_name(request_parameters: dict) -> str:
     :return: function name string
     """
     request_parameters = _uppercase_dict_keys(request_parameters)
-    return request_parameters.get("NVCF-FUNCTION-ID", "")
+    return request_parameters.get("NVCF-FUNCTION-NAME", "")
 
 
 def get_config_value(value_name: str, model_config: dict = None) -> str:
@@ -430,4 +430,3 @@ def get_secrets() -> dict:
         raise FileNotFoundError(f"Secrets file not found at {SECRETS_PATH}")
     except json.JSONDecodeError as e:
         raise json.JSONDecodeError(f"Invalid JSON in secrets file: {str(e)}", e.doc, e.pos)
-
