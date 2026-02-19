@@ -13,6 +13,7 @@ import requests
 DEFAULT_MAX_NVCF_MSG_SIZE = 5 * 1000 * 1000  # 5MB
 IMAGE_FORMAT = "JPEG"
 IMAGE_QUALITY = 90
+SECRETS_PATH = "/var/secrets/secrets.json"
 
 b64_pattern = re.compile(
     "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$"
