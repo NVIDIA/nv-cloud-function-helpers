@@ -17,6 +17,7 @@ Functions are long-running services that respond to HTTP or gRPC invocations.
 | [vLLM OTLP Exporter](function_samples/vllm_otlp_exporter_sample/) | vLLM inference with OpenTelemetry (OTLP) metric exporting for BYO Observability. |
 | [Inference Helm Chart](function_samples/helmchart_samples/inference_test_sample/) | Helm chart that deploys the FastAPI Echo sample on a Kubernetes cluster. |
 | [Multi-Node Helm Function](function_samples/helmchart_samples/multi_node_helm_function_test/) | Multi-node Helm chart for running NCCL and GPU bandwidth tests via NVCF. |
+| [Load Tester Supreme](function_samples/load_tester_supreme/) | HTTP and gRPC echo servers designed for load and throughput testing. |
 
 ## Task Samples
 
@@ -29,6 +30,10 @@ Tasks are short-lived, run-to-completion workloads (training jobs, batch process
 | [Task Helm Chart](tasks_samples/task_helmchart_sample/) | Helm chart that deploys the simple task sample on a Kubernetes cluster. |
 | [Task Helm Chart BYOO](tasks_samples/task_helmchart_byoo_sample/) | Helm chart that deploys the BYOO task sample on a Kubernetes cluster. |
 | [Multi-Node Helm Task](tasks_samples/multi_node_helm_task_test/) | Multi-node Helm chart for running distributed task workloads. |
+
+## Load Tests
+
+k6 load testing scripts for NVCF and NVCT endpoints are in the [load-tests/](load-tests/) directory.
 
 ## Building for Multiple Compute Architectures
 
