@@ -1,7 +1,13 @@
 # Examples
 
-Sample containers for deploying functions and tasks on
+Sample containers, configurations, and guides for
 [NVIDIA Cloud Functions (NVCF)](https://docs.nvidia.com/cloud-functions/user-guide/latest/cloud-function/overview.html).
+
+## Local Development
+
+| Sample | Description |
+|--------|-------------|
+| [Self-Hosted Local Development](self_hosted_local_development/) | Run the full NVCF self-hosted control plane locally on k3d with fake GPUs. Includes cluster config, setup script, and teardown. |
 
 ## Function Samples
 
