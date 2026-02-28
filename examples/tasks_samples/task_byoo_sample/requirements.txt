@@ -11,4 +11,4 @@ opentelemetry-sdk==1.29.0
 opentelemetry-semantic-conventions==0.50b0
 opentelemetry-util-http==0.50b0
 opentelemetry-instrumentation-logging
-requests==2.31.0
+requests==2.32.4
