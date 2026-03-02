@@ -31,7 +31,7 @@ This creates a k3d cluster with:
 
 ### 2. Deploy the NVCF stack
 
-Follow the [Local Development guide](https://docs.nvidia.com/cloud-functions/self-hosted/latest/local-development.html#deploy-the-nvcf-stack) in the self-hosted documentation. It walks through:
+Follow the Local Development Guide for deployment of the helmfile - nvcf-self-managed-stack. This is available in the Self-Hosted NVCF documentation which is currently early access only. Please reach out to your NVIDIA representative for access.
 
 1. **Environment file** — Download the local development environment template from the docs and save it as `environments/<name>.yaml` in your `nvcf-self-managed-stack` directory. The template uses `nvcr.io/0833294136851237/nvcf-ncp-staging` and is pre-configured for k3d.
 
