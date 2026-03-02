@@ -84,6 +84,7 @@ Both scripts require the [NGC CLI](https://org.ngc.nvidia.com/setup/installers/c
 | `HTTP_SUPREME_NVCF_URL` | HTTP endpoint URL. |
 | `NVCF_GRPC_URL` | gRPC endpoint URL. |
 | `GRPC_SUPREME_FUNCTION_ID` | Function ID for gRPC calls. |
+| `GRPC_SUPREME_FUNCTION_VERSION_ID` | Function version ID for gRPC calls |
 | `SENT_MESSAGE_SIZE` | Payload size in bytes. |
 | `RESPONSE_COUNT` | Number of response repeats. |
 | `RESPONSE_DELAY_TIME` | Delay between responses in seconds (optional). |
