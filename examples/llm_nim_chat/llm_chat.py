@@ -22,7 +22,7 @@ Or set environment variables and run without flags:
     export NVCF_GATEWAY="a1b2c3d4.us-east-1.elb.amazonaws.com"
     export NVCF_FUNCTION_ID="<function-uuid>"
     export NVCF_FUNCTION_VERSION_ID="<version-uuid>"
-    export NVCF_MODEL="meta/llama-3.1-8b-instruct"
+    export NVCF_MODEL="nvidia/llama-3.1-nemotron-nano-8b-v1"
     export NVCF_API_KEY="nvapi-..."
     python3 llm_chat.py
 
@@ -50,10 +50,11 @@ CHOOSING A DIFFERENT MODEL
 To use a different NIM, change --model to match the model name passed to
 NIM_MODEL_NAME when the function was created. Common examples:
 
-    meta/llama-3.1-8b-instruct       (A10G, ~16 GB VRAM)
-    mistralai/mistral-7b-instruct-v0.3  (A10G, ~14 GB VRAM)
-    microsoft/phi-3-mini-4k-instruct    (A10G, ~8 GB VRAM)
-    meta/llama-3.1-70b-instruct      (H100 / L40S, ~140 GB VRAM)
+    nvidia/llama-3.1-nemotron-nano-8b-v1  (A10G, ~16 GB VRAM)  ← default
+    meta/llama-3.1-8b-instruct            (A10G, ~16 GB VRAM)
+    mistralai/mistral-7b-instruct-v0.3    (A10G, ~14 GB VRAM)
+    microsoft/phi-3-mini-4k-instruct      (A10G, ~8 GB VRAM)
+    meta/llama-3.1-70b-instruct           (H100 / L40S, ~140 GB VRAM)
 
 ────────────────────────────────────────────────────────────────────────────
 COMMANDS DURING CHAT
@@ -331,7 +332,7 @@ def main():
     )
     parser.add_argument(
         "--model",
-        default=os.environ.get("NVCF_MODEL", "meta/llama-3.1-8b-instruct"),
+        default=os.environ.get("NVCF_MODEL", "nvidia/llama-3.1-nemotron-nano-8b-v1"),
         help="Model name as passed to NIM_MODEL_NAME (env: NVCF_MODEL)",
     )
     parser.add_argument(
