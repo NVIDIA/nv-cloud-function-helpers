@@ -10,24 +10,26 @@ Interactive terminal chat with an LLM NIM deployed on self-hosted NVCF.
 
 ## Quick Start
 
-Pass your cluster details as command-line flags:
+**Recommended — one-time setup with a `.env` file:**
 
 ```bash
-python3 llm_chat.py \
-    --gateway  a1b2c3d4.us-east-1.elb.amazonaws.com \
-    --function-id  <function-uuid> \
-    --version-id   <version-uuid> \
-    --model        meta/llama-3.1-8b-instruct \
-    --api-key      nvapi-...
+cp .env.example .env
+# Edit .env and fill in your gateway, function ID, version ID, and API key
+python3 llm_chat.py   # no flags needed after that
 ```
 
-Or set environment variables and run without flags:
+Alternatively, pass everything as flags (single line, no backslash continuations):
+
+```bash
+python3 llm_chat.py --gateway "a1b2c3d4.us-east-1.elb.amazonaws.com" --function-id "<function-uuid>" --version-id "<version-uuid>" --api-key "nvapi-..."
+```
+
+Or export environment variables before running:
 
 ```bash
 export NVCF_GATEWAY="a1b2c3d4.us-east-1.elb.amazonaws.com"
 export NVCF_FUNCTION_ID="<function-uuid>"
 export NVCF_FUNCTION_VERSION_ID="<version-uuid>"
-export NVCF_MODEL="meta/llama-3.1-8b-instruct"
 export NVCF_API_KEY="nvapi-..."
 python3 llm_chat.py
 ```
@@ -51,6 +53,7 @@ creating the function.
 
 | Model | GPU | VRAM |
 |-------|-----|------|
+| `nvidia/llama-3.1-nemotron-nano-8b-v1` | A10G | ~16 GB |
 | `meta/llama-3.1-8b-instruct` | A10G | ~16 GB |
 | `mistralai/mistral-7b-instruct-v0.3` | A10G | ~14 GB |
 | `microsoft/phi-3-mini-4k-instruct` | A10G | ~8 GB |

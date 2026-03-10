@@ -73,6 +73,39 @@ import os
 import sys
 import textwrap
 
+
+# ── .env file support ────────────────────────────────────────────────────────
+# If a .env file exists in the current directory, load it so that running
+# `python3 llm_chat.py` with no flags Just Works after a one-time setup.
+#
+# Create a .env file in this directory (never commit it — add to .gitignore):
+#
+#   NVCF_GATEWAY=a1b2c3d4.us-east-1.elb.amazonaws.com
+#   NVCF_FUNCTION_ID=<function-uuid>
+#   NVCF_FUNCTION_VERSION_ID=<version-uuid>
+#   NVCF_MODEL=nvidia/llama-3.1-nemotron-nano-8b-v1
+#   NVCF_API_KEY=nvapi-...
+#
+# Values in .env are only used when the matching environment variable is not
+# already set, so shell exports always take precedence.
+
+def _load_dotenv(path: str = ".env"):
+    if not os.path.isfile(path):
+        return
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, value = line.partition("=")
+            key = key.strip()
+            value = value.strip().strip("\"'")
+            os.environ.setdefault(key, value)
+
+_load_dotenv()
+# ─────────────────────────────────────────────────────────────────────────────
+
+
 try:
     from openai import OpenAI
 except ImportError:
