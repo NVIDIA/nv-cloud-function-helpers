@@ -298,7 +298,7 @@ ngc cf fn list --access-filter private --format_type json | jq -r '.[] | select(
 #### Basic curl invocation
 
 ```bash
-export NGC_API_KEY="nvapi-<your-personal-api-key>"
+export NGC_API_KEY="nvapi-${YOUR_PERSONAL_API_KEY}"
 export FUNCTION_ID="818e9a33-e01a-457d-b3bb-5bafca412098"
 
 curl --request POST \
@@ -323,18 +323,18 @@ curl --request POST \
 #### Python invocation
 
 ```python
-import os
-import requests
+import os, requests
 
-NGC_API_KEY = os.environ["NGC_API_KEY"]  # nvapi-<token>
+api_key = os.getenv("NGC_API_KEY")
 FUNCTION_ID = "818e9a33-e01a-457d-b3bb-5bafca412098"
+headers = {
+    "Authorization": f"Bearer {api_key}",
+    "Content-Type": "application/json"
+}
 
 response = requests.post(
     f"https://{FUNCTION_ID}.invocation.api.nvcf.nvidia.com/echo",
-    headers={
-        "Authorization": f"Bearer {NGC_API_KEY}",
-        "Content-Type": "application/json"
-    },
+    headers=headers,
     json={"message": "hello"}
 )
 
@@ -347,7 +347,7 @@ print(response.json())
 ### Workflow 9: Discover Function API via OpenAPI Spec
 
 ```bash
-export NGC_API_KEY="nvapi-<your-personal-api-key>"
+export NGC_API_KEY="nvapi-${YOUR_PERSONAL_API_KEY}"
 export FUNCTION_ID="<function-id>"
 
 # Fetch the OpenAPI spec

@@ -56,7 +56,7 @@ docker build -t my-inference-app:v1.0 .
 
 The NGC registry path format is `nvcr.io/<org>/[<team>/]<image>:<tag>`.
 
-Use the org from `ngc config current` (the org slug or ID shown in the output). For example, if your org is `myorg`:
+Use the org name from `ngc config current` (or the **Name** column from `ngc org list`). For example, if your org name is `myorg`:
 
 ```bash
 docker tag my-inference-app:v1.0 nvcr.io/myorg/my-inference-app:v1.0
@@ -105,7 +105,7 @@ ngc cf fn create \
 ngc registry image list
 
 # List images in a specific org
-ngc registry image list --org <org-id>
+ngc registry image list --org <org-name>
 
 # List images with a name filter
 ngc registry image list myorg/my-*
@@ -132,8 +132,10 @@ ngc registry image list <org>/<image>
 ### Removing Images
 
 ```bash
-ngc registry image remove <org>/<image>:<tag>
+ngc registry image remove <org>/<image>:<tag> -y
 ```
+
+**Always pass `-y`** to `ngc registry … remove` commands to suppress the interactive `[y/n]` confirmation prompt (required for non-interactive/agent execution).
 
 ### Image Path Formats for NVCF
 
@@ -163,7 +165,7 @@ Helm charts stored in the NGC registry can be used to deploy functions and tasks
 ngc registry chart list
 
 # List charts in a specific org
-ngc registry chart list --org <org-id>
+ngc registry chart list --org <org-name>
 
 # Get chart details
 ngc registry chart info <org>/<chart>:<version>
@@ -210,7 +212,7 @@ Models stored in the NGC registry can be mounted into function and task containe
 ngc registry model list
 
 # List models with a filter
-ngc registry model list --org <org-id>
+ngc registry model list --org <org-name>
 
 # Get model details
 ngc registry model info <org>/<model>:<version>
@@ -303,10 +305,27 @@ ngc cf registry-credential create \
 ngc cf registry-credential list
 ```
 
+### Get credential info
+
+```bash
+ngc cf registry-credential info <registry-credential-id>
+```
+
+### Update a credential
+
+```bash
+ngc cf registry-credential update <registry-credential-id> \
+  --hostname <registry-hostname> \
+  --name <new-name> \
+  --key <secret-key>
+```
+
 ### Remove a credential
 
 ```bash
-ngc cf registry-credential remove <credential-name>
+# Pass the credential ID, not the name
+# First run ngc cf registry-credential list to obtain the credential ID
+ngc cf registry-credential remove <registry-credential-id>
 ```
 
 For full third-party registry setup, see the [NVIDIA Cloud Functions Third-Party Registries documentation](https://docs.nvidia.com/cloud-functions/user-guide/latest/cloud-function/third-party-registries.html).
@@ -332,7 +351,7 @@ The image path format is wrong. Ensure third-party images include the full regis
 ### Cannot list images in the registry
 
 1. Check your active org: `ngc config current`
-2. Try specifying the org explicitly: `ngc registry image list --org <org-id>`
+2. Try specifying the org explicitly: `ngc registry image list --org <org-name>`
 3. If the org uses teams, you may need to specify the team: `ngc registry image list <org>/<team>/`
 4. Use `--format_type json` for more detailed output
 

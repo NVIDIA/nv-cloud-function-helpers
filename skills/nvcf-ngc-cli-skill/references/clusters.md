@@ -17,6 +17,38 @@ ngc cf cluster info <cluster-id>
 ngc cf cluster list --format_type json
 ```
 
+## Discovering Shared Clusters
+
+`ngc cf cluster list` only shows clusters **registered by your org**. Many orgs also have access to shared NVCF-managed clusters that do not appear in the cluster list. To discover all clusters available to your org (including shared ones), inspect the GPU allocations:
+
+```bash
+ngc cf gpu list
+```
+
+Each GPU instance type entry includes a `Clusters` field listing which clusters that allocation is available on. To extract a deduplicated list of all shared cluster names:
+
+```bash
+ngc cf gpu list --org <org-name> 2>/dev/null \
+  | grep 'Clusters:' \
+  | sed 's/.*Clusters: //' \
+  | tr ',' '\n' \
+  | sed 's/^[[:space:]]*//' \
+  | sort -u \
+  | grep -v '^$'
+```
+
+Shared cluster names typically follow a naming convention that encodes the cloud provider and region:
+
+| Pattern | Cloud Provider | Example |
+|---------|---------------|---------|
+| `nvcf-dgxc-k8s-aws-*` | AWS | `nvcf-dgxc-k8s-aws-use1-prd5` |
+| `nvcf-dgxc-k8s-oci-*` | OCI | `nvcf-dgxc-k8s-oci-nrt-prd5` |
+| `nvcf-dgxc-k8s-gcp-*` | GCP | `nvcf-dgxc-k8s-gcp-azne1-prd7` |
+| `nvcf-dgxc-k8s-forge-az*` | Azure (Forge) | `nvcf-dgxc-k8s-forge-az61-prd1` |
+| `nvcf-dgxc-k8s-forge-ytl*` | Forge (YTL) | `nvcf-dgxc-k8s-forge-ytl-prd1` |
+
+These shared cluster names are what you reference in the `--targeted-dep-spec` cluster field when deploying functions or tasks.
+
 ## Registering a Cluster
 
 **Authentication requirement:** Cluster creation requires browser-based (email) authentication. API key auth alone is not sufficient. If the CLI returns `"Requires browser authentication. Use ngc config set --auth-option email."`, the user must run `ngc config set --auth-option email` and complete the browser login flow before retrying. Do not attempt to bypass this by calling the REST API directly.
@@ -27,7 +59,7 @@ ngc cf cluster create \
   --cluster-group-name <group-name> \
   --cloud-provider <provider> \
   --region <region> \
-  --ssa-client-id <ssa-client-id> \
+  [--ssa-client-id <ssa-client-id>] \
   [--cluster-description "<description>"] \
   [--capability <capability>] \
   [--attribute <attribute>] \
@@ -44,7 +76,8 @@ ngc cf cluster create \
 | `--cluster-group-name` | Group name for deploying across multiple clusters |
 | `--cloud-provider` | Cloud platform: `AWS`, `AZURE`, `GCP`, `OCI`, `DGX-CLOUD`, `ON-PREM` |
 | `--region` | Deployment region (see supported regions below) |
-| `--ssa-client-id` | SSA client ID for authentication |
+
+**Note:** `--ssa-client-id` is only required for internal NVIDIA orgs. External orgs do not need this parameter for cluster registration.
 
 ### Supported regions
 
@@ -137,7 +170,7 @@ Note: Backend is optional. Format: `<gpu>:<instance_type>[:<backend>][:<clusters
 
 ## Examples
 
-### Register an AWS cluster
+### Register an AWS cluster (external org, no SSA client ID needed)
 
 ```bash
 ngc cf cluster create \
@@ -145,10 +178,21 @@ ngc cf cluster create \
   --cluster-group-name production \
   --cloud-provider AWS \
   --region us-west-2 \
-  --ssa-client-id abc123-def456 \
   --cluster-description "Production cluster in AWS us-west-2" \
   --capability DynamicGPUDiscovery \
   --capability LogPosting
+```
+
+### Register an AWS cluster (internal NVIDIA org, with SSA client ID)
+
+```bash
+ngc cf cluster create \
+  --cluster-name aws-internal-cluster \
+  --cluster-group-name production \
+  --cloud-provider AWS \
+  --region us-west-2 \
+  --ssa-client-id abc123-def456 \
+  --cluster-description "Internal cluster in AWS us-west-2"
 ```
 
 ### Register an on-premise cluster

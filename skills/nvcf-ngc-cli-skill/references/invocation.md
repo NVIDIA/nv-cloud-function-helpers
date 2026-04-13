@@ -17,10 +17,7 @@ Detailed reference for invoking NVCF functions via HTTP and gRPC.
 [ -n "$NGC_API_KEY" ] && echo "NGC_API_KEY is configured" || echo "NGC_API_KEY is not set"
 ```
 
-**Do NOT use** commands that could leak the key:
-- `echo $NGC_API_KEY` - exposes the key
-- `printenv NGC_API_KEY` - exposes the key
-- `env | grep NGC` - may expose the key
+Avoid commands that print environment variable values directly (echo, printenv, env with grep), as these would expose the key in the terminal output.
 
 ### Step 2: If not set, try loading from NGC CLI config
 
@@ -131,24 +128,23 @@ curl --request POST \
 
 ## Python Invocation
 
+All Python examples below assume `NGC_API_KEY` is already set in your environment (see [API Key Handling](#api-key-handling) above).
+
 ### Basic request
 
 ```python
-import os
-import requests
+import os, requests
 
-NGC_API_KEY = os.environ.get("NGC_API_KEY")
-if not NGC_API_KEY:
-    raise EnvironmentError("NGC_API_KEY environment variable is not set")
-
+api_key = os.getenv("NGC_API_KEY")
 FUNCTION_ID = "<function-id>"
+headers = {
+    "Authorization": f"Bearer {api_key}",
+    "Content-Type": "application/json"
+}
 
 response = requests.post(
     f"https://{FUNCTION_ID}.invocation.api.nvcf.nvidia.com/echo",
-    headers={
-        "Authorization": f"Bearer {NGC_API_KEY}",
-        "Content-Type": "application/json"
-    },
+    headers=headers,
     json={"message": "hello"}
 )
 print(response.json())
@@ -157,22 +153,19 @@ print(response.json())
 ### Streaming response
 
 ```python
-import os
-import requests
+import os, requests
 
-NGC_API_KEY = os.environ.get("NGC_API_KEY")
-if not NGC_API_KEY:
-    raise EnvironmentError("NGC_API_KEY environment variable is not set")
-
+api_key = os.getenv("NGC_API_KEY")
 FUNCTION_ID = "<function-id>"
+headers = {
+    "Authorization": f"Bearer {api_key}",
+    "Content-Type": "application/json",
+    "Accept": "text/event-stream"
+}
 
 response = requests.post(
     f"https://{FUNCTION_ID}.invocation.api.nvcf.nvidia.com/generate",
-    headers={
-        "Authorization": f"Bearer {NGC_API_KEY}",
-        "Content-Type": "application/json",
-        "Accept": "text/event-stream"
-    },
+    headers=headers,
     json={"prompt": "Tell me a story"},
     stream=True
 )
@@ -192,16 +185,15 @@ For gRPC functions, use host `grpc.nvcf.nvidia.com:443` with metadata:
 | `authorization` | `Bearer nvapi-<token>` | Yes |
 | `function-version-id` | Specific version ID | No |
 
+**Always probe the gRPC server with reflection first** to discover the actual service interface. Do NOT assume Triton or any other specific protocol based on container image name or inferenceUrl alone. Use gRPC server reflection to list available services and methods, then generate the appropriate client stub.
+
 ### Python gRPC example
 
 ```python
-import os
-import grpc
+import os, grpc
+from grpc_reflection.v1alpha import reflection_pb2, reflection_pb2_grpc
 
-NGC_API_KEY = os.environ.get("NGC_API_KEY")
-if not NGC_API_KEY:
-    raise EnvironmentError("NGC_API_KEY environment variable is not set")
-
+api_key = os.getenv("NGC_API_KEY")
 channel = grpc.secure_channel(
     'grpc.nvcf.nvidia.com:443',
     grpc.ssl_channel_credentials()
@@ -209,10 +201,17 @@ channel = grpc.secure_channel(
 
 metadata = [
     ('function-id', '<function-id>'),
-    ('authorization', f'Bearer {NGC_API_KEY}')
+    ('authorization', f"Bearer {api_key}")
 ]
 
-# Use your generated stub
+# Step 1: Probe available services via gRPC reflection
+reflection_stub = reflection_pb2_grpc.ServerReflectionStub(channel)
+requests = [reflection_pb2.ServerReflectionRequest(list_services="")]
+responses = reflection_stub.ServerReflectionInfo(iter(requests), metadata=metadata)
+for response in responses:
+    print(response.list_services_response)
+
+# Step 2: Use the discovered service/method to create the correct stub
 stub = YourServiceStub(channel)
 response = stub.YourMethod(request, metadata=metadata)
 ```

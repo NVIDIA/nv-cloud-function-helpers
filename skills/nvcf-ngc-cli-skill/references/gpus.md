@@ -4,11 +4,13 @@ Detailed reference for managing GPU resources and quotas via NGC CLI.
 
 ## List Allocated GPUs
 
-View GPUs currently allocated to your organization:
+View GPUs currently allocated to your organization, including available instance types, clusters, and regions for each GPU type:
 
 ```bash
 ngc cf gpu list
 ```
+
+This command also reveals **shared clusters** available to your org that do not appear in `ngc cf cluster list`. Each instance type entry includes a `Clusters` field showing which clusters that GPU allocation can deploy to. See [clusters.md](clusters.md) for how to extract all available cluster names from this output.
 
 ## GPU Capacity
 
@@ -172,11 +174,12 @@ ngc cf gpu info GB200
 
 Output includes instance types (e.g., `OCI.GPU.H100_1x`), memory specs, available clusters, and regions.
 
-## Available GPUs (Admin Only)
+## Available GPUs (Admin Only) — DEPRECATED
 
-List all available GPU types in your organization:
+> **Deprecated:** `ngc cf available-gpus` is admin-only and pending deprecation. Use `ngc cf gpu list` instead.
 
 ```bash
+# DEPRECATED — use ngc cf gpu list instead
 ngc cf available-gpus
 ```
 
@@ -265,7 +268,7 @@ ngc cf fn deploy list --format_type json
 
 For each deployment, quota usage = `maxInstances` x GPUs per instance type. Extract the GPU count from the instance type name (e.g., `_2x` = 2 GPUs, `_4x` = 4 GPUs, `_8x.x4` = 32 GPUs). Sum across all deployments per GPU type and compare against the quota limit.
 
-Note: `ngc cf gpu list` shows available instance types and platform capacity, not your org's current usage. Use `ngc cf fn deploy list` for actual deployment-level usage.
+Note: `ngc cf gpu list` shows available instance types, shared clusters, and platform capacity, not your org's current usage. Use `ngc cf fn deploy list` for actual deployment-level usage.
 
 ### Filter capacity by multiple GPUs
 

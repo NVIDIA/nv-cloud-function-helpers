@@ -31,9 +31,18 @@ ngc cf fn create \
   [--metrics-telemetry-id <uuid>] \
   [--logs-telemetry-id <uuid>] \
   [--traces-telemetry-id <uuid>]
+# Telemetry endpoint IDs: obtain via ngc cf telemetry-endpoint create/list
 ```
 
 **Important:** If the container is not Triton-based, you almost certainly need `--health-uri` and possibly `--health-port`. See [Health check configuration](#health-check-configuration) below.
+
+**`--inference-url` is required.** Before creating any function, determine the correct `--inference-url` value:
+
+1. **Check the user's source code or Dockerfile** for the endpoint path the container serves (e.g., `/predict`, `/v1/completions`, `/generate`).
+2. **Check the container image name** for well-known frameworks (vLLM → `/v1/completions`, Triton → `/v2/models/{model}/infer`).
+3. **If neither is conclusive, use `"/"`** as the default.
+
+For **STREAMING** functions (Low Latency Streaming for graphical workloads), also **confirm the inference port** with the user before proceeding — STREAMING workloads often use non-standard ports. Do not set `--function-type STREAMING` on regular API functions.
 
 ### Container image formats
 
@@ -54,8 +63,30 @@ ngc cf fn create \
   --name <function-name> \
   --inference-url <endpoint-path> \
   --helm-chart <org>/[<team>/]<chart>:<tag> \
-  --helm-chart-service <service-name>
+  --helm-chart-service <service-name> \
+  [--health-uri <path>] \
+  [--health-port <port>]
 ```
+
+#### Helm chart port mapping
+
+When creating a function from a Helm chart, the `--inference-port` must be set to the **Kubernetes service port** (`spec.ports[].port` in the chart's `service.yaml`), NOT the container's `targetPort` or any `values.yaml` variable.
+
+To determine the correct port:
+1. Read the chart's `service.yaml` and find `spec.ports[].port` under the entrypoint service
+2. Use that value as `--inference-port`
+
+**Do NOT** use `targetPort` or `values.yaml` variables like `inferencePort` — these are internal container ports, not the service-level port NVCF routes traffic to.
+
+#### Resolving health URI before function creation
+
+**Required:** Before creating any function, you must determine the correct `--health-uri` value. Do not guess. Follow this checklist in order:
+
+1. **Check for explicit health endpoint info.** For container functions, inspect the Dockerfile or source. For Helm chart functions, check deployment.yaml for `readinessProbe` or `livenessProbe` — if a probe defines `httpGet.path`, use that as `--health-uri` (and the probe's `port` as `--health-port` if it differs from 8000).
+2. **Check the container image name** for well-known frameworks (e.g., Triton → `/v2/health/ready`, vLLM → `/health`). If clearly one of these, use the documented value.
+3. **If neither source is conclusive, stop and ask the user.** Do not guess. Prompt: *"What path does the service use for health checks? (e.g., /health, /healthz)"*
+
+**Transparency:** When you set `--health-uri`, always state what source you used and what value you chose before running `fn create`. Example: *"The deployment.yaml has a readinessProbe at `/healthz` on port 8080 — I'll use `--health-uri /healthz --health-port 8080`."* This lets the user correct the value immediately instead of discovering the problem after a failed deployment.
 
 ### Health check configuration
 
@@ -246,7 +277,7 @@ ngc cf fn instance execute <function-id>:<version-id> \
 
 ## Function Invocation
 
-For detailed invocation documentation including HTTP, Python, gRPC examples, streaming, OpenAPI discovery, API key handling, and troubleshooting, see [invocation.md](invocation.md).
+For detailed invocation documentation (HTTP, Python, gRPC, streaming, OpenAPI discovery, API key handling, troubleshooting), see the invocation reference linked from SKILL.md.
 
 Quick reference (assumes `NGC_API_KEY` is set):
 
@@ -279,6 +310,8 @@ ngc cf fn auth clear <function-id>:<version-id>
 ```
 
 ## Secrets
+
+**Important:** Secrets can only be added or modified when the function is in **INACTIVE** state. Check state with `ngc cf fn info <fn-id>:<version-id>` first. If ACTIVE, undeploy → add secret → redeploy.
 
 ```bash
 # Update secrets
