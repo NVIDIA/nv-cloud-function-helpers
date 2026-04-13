@@ -2,26 +2,14 @@
 name: nvcf-ngc-cli-skill
 description: Comprehensive skill for NVIDIA Cloud Functions (NVCF) via NGC CLI. Covers functions, tasks, clusters, GPU management, and the NGC registry (nvcr.io). Use when working with cloud functions, deployments, batch tasks, cluster registration, GPU capacity, container images, Helm charts, models, resources, or when the user mentions ngc cf, NVCF, cloud functions, function deployment, GPU quota, nvcr.io, ngc registry, pushing images, or container registry.
 compatibility: Requires NGC CLI installed and configured
+author: "nvcf-core-eng <nvcf-core-eng@exchange.nvidia.com>"
+version: "1.0.0"
+tags: [ngc, nvcf, cloud-functions, deployment, serverless, task, batch, cluster, gpu, cli, registry, nvcr, container-image, helm-chart, model, resource]
+tools:
+  - Shell
+  - Read
+  - Write
 metadata:
-  author: "nvcf-core-eng <nvcf-core-eng@exchange.nvidia.com>"
-  version: "1.0"
-  tags:
-    - ngc
-    - nvcf
-    - cloud-functions
-    - deployment
-    - serverless
-    - task
-    - batch
-    - cluster
-    - gpu
-    - cli
-    - registry
-    - nvcr
-    - container-image
-    - helm-chart
-    - model
-    - resource
   languages:
     - bash
     - python
@@ -34,7 +22,13 @@ metadata:
 
 Complete reference for managing NVIDIA Cloud Functions (NVCF) via NGC CLI.
 
+## Instructions
+
+Use this skill for NGC CLI based NVCF operations, prefer the documented `ngc cf` workflows over ad hoc commands, and use the linked references only when the core guide is insufficient.
+
 ## Before You Start
+
+### Verify NGC CLI installed
 
 Run `ngc config current` **once** at the beginning of a session to confirm which organization is active. Report the org name and ID to the user. After that, do not re-run it -- remember the result for the rest of the session.
 
@@ -42,23 +36,27 @@ Run `ngc config current` **once** at the beginning of a session to confirm which
 ngc config current
 ```
 
+If `ngc` command is not found, NEVER look for other places and MUST NOT continue. Just tell the user to install NGC CLI from [NGC CLI Documentation](https://docs.ngc.nvidia.com/cli/index.html) and then run `ngc config set`.
+
+If NGC CLI is installed but `ngc config current` shows no configured account, MUST NOT continue. Just tell the user to run `ngc config set` and enter their API key and default org/team when prompted.
+
 ### Do Not Modify NGC Configuration
 
 **Never** change the active organization, team, or any other NGC CLI configuration on behalf of the user. This includes commands like `ngc config set`, `ngc config set --org`, or any operation that modifies `~/.ngc/config`. Only the user may change their NGC configuration explicitly.
 
-If the user needs to operate on a different org than the one configured, use the `--org` flag on the specific command instead. Use `ngc org list` to discover available orgs and their IDs:
+If the user needs to operate on a different org than the one configured, use the `--org` flag on the specific command instead. Use `ngc org list` with JSON output to discover available orgs and their names:
 
 ```bash
-ngc org list
+ngc org list --format_type json | jq -r '.[] | "\(.name)\t\(.displayName)"'
 ```
 
-The `--org` flag accepts the **org ID** (the alphanumeric string shown in parentheses), not the display name. For example, if `ngc org list` shows `sae-sme-nvcf (0530795645140221)`, use:
+The `--org` flag accepts the `name` field (not `displayName`). For example, if the output shows `ax3ysqem02xw` with display name `nvcf-eng-staging`, use:
 
 ```bash
-ngc cf gpu quota --org 0530795645140221
+ngc cf gpu quota --org ax3ysqem02xw
 ```
 
-### Verify NGC_API_KEY (Required Before Invocation)
+### Verify NGC_API_KEY only if NGC CLI installed (Required Before Invocation)
 
 If the task involves invoking a function (via curl, HTTP, or any script), you **must** verify `NGC_API_KEY` is available in the agent's shell **before** attempting any invocation. Do not attempt invocation first and troubleshoot after failure.
 
@@ -81,14 +79,11 @@ All NVCF management operations must go through the NGC CLI. Do not attempt to ca
 
 **Exception:** Function invocation is done via direct HTTP calls (curl), not the CLI. See [Invocation Reference](references/invocation.md) for details.
 
-## Prerequisites
+### Destructive Operations
 
-1. **Install NGC CLI**: Download from [NGC CLI Documentation](https://docs.ngc.nvidia.com/cli/index.html)
-2. **Configure authentication**:
-   ```bash
-   ngc config set
-   ```
-   Enter your API key and default org/team when prompted.
+Before executing any irreversible command (`fn remove`, `fn deploy remove`, `cluster delete`, `task cancel`, `task delete`, `fn auth clear`), you **MUST** display the resource name/ID/state to the user, explicitly ask for confirmation, and warn if the resource is ACTIVE. For bulk operations, list ALL affected resources and get approval before executing any deletion.
+
+**Non-interactive flag:** Many `ngc` commands prompt for `[y/n]` confirmation, which causes agents to hang because the shell cannot provide interactive input. After obtaining user confirmation, always pass `-y` (or `--yes`) to suppress the prompt. This applies to all `ngc registry … remove` commands (image, chart, model, resource, collection, label-set, encryption-key) and `ngc dataset remove`, `ngc workspace remove`, `ngc org remove-team`, `ngc org remove-user`, and `ngc team remove-user`. Example: `ngc registry chart remove <org>/<chart>:<version> -y`. Note: `ngc cf` subcommands (fn remove, cluster delete, task delete) do **not** prompt and do not need `-y`.
 
 ## Environment Configuration
 
@@ -100,7 +95,7 @@ No additional configuration needed.
 
 ```bash
 export NGC_CLI_API_URL=https://api.stg.ngc.nvidia.com
-export NGC_CLI_API_KEY=<your-staging-api-key>
+export NGC_CLI_API_KEY=${YOUR_STAGING_API_KEY}
 ```
 
 ## Command Structure
@@ -116,12 +111,14 @@ ngc cf <subcommand> [options]  # shorthand
 
 | Option | Description |
 |--------|-------------|
-| `--org <id>` | Specify organization by ID (overrides config default). Use `ngc org list` to find org IDs. |
+| `--org <name>` | Specify organization by name (overrides config default). Use `ngc org list` — value from the **Name** column. |
 | `--team <name>` | Specify team (use `--team no-team` for no team) |
 | `--format_type <fmt>` | Output format: `ascii` (default), `csv`, `json` |
-| `--debug` | Enable debug mode for troubleshooting |
+| `--debug` | Show verbose API request/response details for troubleshooting |
 
 ## Quick Reference
+
+> Primary lifecycle commands only. See linked reference files for full command lists.
 
 ### Functions (`ngc cf fn`)
 
@@ -134,6 +131,7 @@ ngc cf fn create --name <name> --inference-url <path> --container-image <image> 
 
 # List functions (org-owned only)
 ngc cf fn list --access-filter private
+# Filter by name: ngc cf fn list --access-filter private --name-pattern "<pattern>"
 
 # Get function info
 ngc cf fn info <function-id>:<version-id>
@@ -185,19 +183,21 @@ ngc cf task delete <task-id>
 Register and manage clusters. See [references/clusters.md](references/clusters.md) for details.
 
 ```bash
-# List clusters
+# List registered clusters (org-owned only)
 ngc cf cluster list
 
 # Get cluster info
 ngc cf cluster info <cluster-id>
 
-# Register cluster
+# Register cluster (--ssa-client-id only required for internal NVIDIA orgs)
 ngc cf cluster create --cluster-name <name> --cluster-group-name <group> \
-  --cloud-provider <provider> --region <region> --ssa-client-id <id>
+  --cloud-provider <provider> --region <region> [--ssa-client-id <id>]
 
 # Delete cluster
 ngc cf cluster delete <cluster-id>
 ```
+
+**Shared clusters:** `ngc cf cluster list` only shows clusters registered by your org. To discover all clusters available (including shared NVCF-managed clusters), check `ngc cf gpu list` -- each instance type entry lists the clusters it can deploy to. See [references/clusters.md](references/clusters.md) for details.
 
 ### GPUs (`ngc cf gpu`)
 
@@ -215,12 +215,13 @@ ngc cf gpu quota --format_type json
 
 # Get GPU info (instance types, clusters)
 ngc cf gpu info <gpu-type>
-
-# List available GPUs (Admin)
-ngc cf available-gpus
 ```
 
 **Quota key facts:** GPU quota controls how many GPUs of each type an org can use. Quota is counted in GPUs (not instances) and is evaluated against **maxInstances**. An `H100_4x` with max=2 uses 8 GPUs of quota (2 x 4). Functions and tasks share the same quota. To check usage, use `ngc cf fn deploy list --format_type json` and sum `maxInstances x GPUs-per-instance-type` per GPU type. If the quota JSON shows `clusters` or `dedicated-clusters` entries, the deployment spec **must** include an explicit cluster name. If it shows `regions` entries, include the region. See [references/gpus.md](references/gpus.md) for full quota details, GPU counting rules, enforcement rules, and error resolution.
+
+### Telemetry Endpoints (`ngc cf telemetry-endpoint`)
+
+Manage telemetry registrations (metrics, logs, traces). IDs are used with `--metrics-telemetry-id`/`--logs-telemetry-id`/`--traces-telemetry-id` on function/task create. Run `ngc cf telemetry-endpoint --help` for subcommands.
 
 ### Registry (`ngc registry`)
 
@@ -246,7 +247,7 @@ ngc registry model list
 ngc registry resource list
 ```
 
-**Image not found?** Verify the active org with `ngc config current`. Try `ngc registry image list --org <org-id>` to specify the org explicitly.
+**Image not found?** Verify the active org with `ngc config current`. Try `ngc registry image list --org <org-name>` to specify the org explicitly (use the **Name** column from `ngc org list`).
 
 ## Function Lifecycle
 
@@ -256,7 +257,9 @@ ngc registry resource list
 4. **Invoke** via HTTP/gRPC
 5. **Remove** deployment and function when done
 
-**Health check note:** At creation time, set `--health-uri` to match the container's actual health endpoint. The default (`/v2/health/ready`) is for Triton Inference Server. Most other containers (FastAPI, vLLM, custom services) use a different path (e.g., `/health`, `/healthz`, `/`). Getting this wrong causes deployments to fail or get stuck. See [references/functions.md](references/functions.md) for details.
+**Health check note:** At creation time, set `--health-uri` to match the container's actual health endpoint. The default (`/v2/health/ready`) is for Triton Inference Server. Most other containers (FastAPI, vLLM, custom services) use a different path (e.g., `/health`, `/healthz`, `/`). Getting this wrong causes deployments to fail or get stuck. Before setting `--health-uri`, check probes or source for the actual path; if inconclusive, ask the user — do not guess. See [references/functions.md](references/functions.md) for details.
+
+**Inference URL note:** `--inference-url` is required at creation time. Inspect the container's source or Dockerfile to determine the endpoint path. If inconclusive, use `/` as the default. For STREAMING functions, also confirm `--inference-port` with the user. See [references/functions.md](references/functions.md) for details.
 
 ### Container Image Formats
 
@@ -303,7 +306,7 @@ Use `ngc cf gpu info <gpu>` to discover available clusters, instance types, and 
 
 ### Invoking Functions
 
-See [references/invocation.md](references/invocation.md) for detailed invocation documentation.
+**Read [references/invocation.md](references/invocation.md) in full before taking any invocation action.**
 
 **Prerequisite:** You must confirm `NGC_API_KEY` is set in the agent's shell before running any invocation command. Follow the [Verify NGC_API_KEY](#verify-ngc_api_key-required-before-invocation) steps above. Do not proceed with invocation until the key is confirmed. Never ask the user for the key value directly.
 
@@ -372,20 +375,7 @@ Use `ngc cf gpu info <gpu-type>` to see all available instance types.
 
 ## Cluster Configuration
 
-### Supported Cloud Providers
-
-| Provider | Description |
-|----------|-------------|
-| `AWS` | Amazon Web Services |
-| `AZURE` | Microsoft Azure |
-| `GCP` | Google Cloud Platform |
-| `OCI` | Oracle Cloud Infrastructure |
-| `DGX-CLOUD` | NVIDIA DGX Cloud |
-| `ON-PREM` | On-premise infrastructure |
-
-### Supported Regions
-
-`us-east-1`, `us-west-1`, `us-west-2`, `eu-central-1`, `eu-north-1`, `eu-south-1`, `eu-west-1`, `ap-east-1`
+Cloud providers: `AWS`, `AZURE`, `GCP`, `OCI`, `DGX-CLOUD`, `ON-PREM`. Regions: `us-east-1`, `us-west-1`, `us-west-2`, `eu-central-1`, `eu-north-1`, `eu-south-1`, `eu-west-1`, `ap-east-1`. See [references/clusters.md](references/clusters.md) for details.
 
 ## Authorization
 
@@ -400,6 +390,9 @@ ngc cf fn auth add <function-id>:<version-id> --authorized-party <nca-id>
 
 # Remove authorization
 ngc cf fn auth remove <function-id>:<version-id> --authorized-party <nca-id>
+
+# Clear all authorizations
+ngc cf fn auth clear <function-id>:<version-id>
 ```
 
 ## Rate Limiting
@@ -415,6 +408,8 @@ ngc cf fn remove-rate-limit <function-id>:<version-id>
 Rate limit patterns: `10-S` (per second), `100-M` (per minute), `1000-H` (per hour), `10000-D` (per day)
 
 ## Secrets Management
+
+**Important:** Secrets can only be added when the function is **INACTIVE**. Check state with `ngc cf fn info` first; if ACTIVE, undeploy → add secret → redeploy.
 
 ```bash
 # Function secrets
@@ -468,7 +463,7 @@ ngc cf fn deploy log <function-id>:<version-id> \
 
 ## Registry Credentials
 
-For private registries like AWS ECR:
+For private registries like AWS ECR. For list, info, update, and remove operations, see [references/registry.md](references/registry.md).
 
 ```bash
 ngc cf registry-credential create \
@@ -481,11 +476,7 @@ ngc cf registry-credential create \
 
 ## Troubleshooting
 
-Enable debug mode to see detailed API calls:
-
-```bash
-ngc cf fn list --debug
-```
+Add `--debug` to any command to inspect the raw API calls (e.g., `ngc cf fn list --debug`).
 
 ## Additional Resources
 
