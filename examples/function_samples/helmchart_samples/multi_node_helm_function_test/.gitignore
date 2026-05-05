@@ -1,5 +1,0 @@
-# Ignore actual config file containing sensitive API keys
-config.env
-
-test_update_and_deploy.sh
-*response.json
