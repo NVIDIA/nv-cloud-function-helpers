@@ -1,5 +1,0 @@
-apiVersion: v1
-appVersion: "0.1"
-description: A Helm chart for validating NVCT w/ BYOO
-name: task-helmchart-byoo
-version: "0.1"
